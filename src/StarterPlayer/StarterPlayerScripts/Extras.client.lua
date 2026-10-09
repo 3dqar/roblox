@@ -112,6 +112,7 @@ local dailyStatus=label(daily,"Loading...",UDim2.fromOffset(20,170),UDim2.new(1,
 local dailyBtn=button(daily,"CLAIM +75 🪙",UDim2.new(.12,0,0,260),UDim2.new(.76,0,0,55),palette.mint,function()
     event:FireServer("Daily")
 end)
+local state
 local effectNames={"Rain","Spark","Aura","Crown","Bomz"}
 local effectButtons={}
 local prices={Rain="FREE",Spark="120 COINS",Aura="10 R$",Crown="20 R$",Bomz="40 R$"}
@@ -152,7 +153,6 @@ button(leaders,"REFRESH",UDim2.new(.2,0,1,-58),UDim2.new(.6,0,0,40),palette.mint
 end)
 local statsText=label(stats,"Loading...",UDim2.fromOffset(18,80),UDim2.new(1,-36,0,230),18,false)
 
-local state
 local function update(d)
     state=d
     if not d then return end
