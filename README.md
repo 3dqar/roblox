@@ -1,36 +1,45 @@
-# TROLL OBBY — Roblox game
+# 🌈 TROLL OBBY
 
-An expandable obstacle course made with Luau and [Rojo](https://rojo.space/).
+Roblox Studio / Rojo project, with a procedural neon obby and a responsive HUD.
 
-## What's included
-- 10 procedural stages with checkpoints, lava and a finish pad
-- DataStore progress saving (highest reached stage)
-- Stage leaderstats and respawning at latest unlocked checkpoint
-- In-game shop UI: **Skip stage (9 Robux)** and **VIP (99 Robux)** placeholders
-- Server-side purchase receipt handling and persistent VIP perks
-- Keyboard, mobile-friendly buttons; no external models or assets
+## Current features
+- 10 colorful stages with jumping platforms, troll traps, lava, and floating stage signs
+- Respawn at checkpoint, stage leaderboard, finish stage
+- DataStore progress saving (when published and API access is enabled)
+- Shop UI: Skip Stage Developer Product and VIP Game Pass (IDs are **0**, so disabled by default)
+- Receipt deduplication with DataStore and server-controlled fulfillment
+- Studio-only test fallback when DataStore API access is not enabled
 
-## Run with Roblox Studio
-1. Install **Roblox Studio** and **Rojo** (CLI + Studio plugin): https://rojo.space/docs/v7/getting-started/installation/
-2. Clone or download this repository.
-3. In the project directory run `rojo serve`.
-4. In Roblox Studio open a **new Baseplate**, then connect through the **Rojo plugin**.
-5. Remove the default Baseplate part if desired; press **Play**. The map is generated at runtime.
-6. For real DataStore tests: **publish the experience**, then in **Game Settings > Security** enable **Studio Access to API Services** only in a safe test experience.
+## Update your local project (IMPORTANT)
+Rojo synchronizes **local files**, not files on GitHub. After GitHub edits, download a fresh ZIP with `Code → Download ZIP`, unzip it and use the **new** `roblox-main` folder, or run `git pull` if you cloned the repository using Git.
 
-## Enable paid purchases
-1. Publish the experience to Roblox.
-2. In Creator Dashboard create a **Developer Product** (Skip Stage, suggested 9 Robux) and **Game Pass** (VIP, suggested 99 Robux).
-3. Copy the IDs into `src/ReplicatedStorage/Config.lua` (replace zeros).
-4. Publish/test again. The purchase buttons do nothing when IDs are 0, and clearly indicate unconfigured purchases.
+**To avoid repeated downloading:** install Git and use these terminal commands in your project folder:
+```sh
+cd ~/Downloads/roblox-main
+# Only if cloned using Git:
+git pull
+~/Downloads/rojo serve
+```
+If you originally downloaded ZIP, it is **not** a Git repository: `git pull` will not work. For subsequent updates, clone it once:
+```sh
+cd ~/Downloads
+git clone https://github.com/3dqar/roblox.git troll-obby
+cd troll-obby
+~/Downloads/rojo serve
+```
+From that point on, stop the Rojo server, run `git pull`, then restart `~/Downloads/rojo serve`. No re-downloading ZIPs.
 
-**Important:** Roblox handles the purchase dialogs; money is not generated simply because players join. Purchases must be tested in a published experience. Roblox publishing/monetization requirements may change.
+## Play
+1. Use [Rojo](https://rojo.space/) CLI and Roblox Studio plugin (same version ideally).
+2. In terminal inside this folder run `rojo serve` (or `~/Downloads/rojo serve`).
+3. Open **Baseplate** in Roblox Studio and connect the Rojo plugin to `localhost:34872`.
+4. Press **Play**. The `GeneratedObby` folder is runtime-generated, meaning it **only appears while Play is running**.
+5. If no map: open **Output** with the **Server** filter. Check whether `TROLL OBBY: generated 10 stages` appears or errors are shown. The HUD alone doesn't prove the server script is running.
+6. In Explorer, verify `ServerScriptService > Main` and `ReplicatedStorage > Config`.
 
-## Architecture
-- `src/ServerScriptService/Main.server.lua`: world generation, checkpoints, saving, product receipt, VIP benefits.
-- `src/StarterPlayer/StarterPlayerScripts/UI.client.lua`: shop and stage HUD.
-- `src/ReplicatedStorage/Config.lua`: prices/IDs, stage count.
-- `default.project.json`: Rojo mapping.
+## Monetization
+1. Publish the experience, create **Developer Product** for Skip Stage and **Game Pass** for VIP in Creator Dashboard.
+2. Enter IDs in `src/ReplicatedStorage/Config.lua`. Until then, purchase buttons show a helpful message.
+3. Test fulfillment in a private published experience, not with real players first.
 
-## Known limits / roadmap
-This is an **MVP**, not a live published Roblox experience. Test in Studio first. Planned: moving obstacles, troll traps, sounds, thumbnail, analytics, additional stages, better monetization balance.
+**Notice:** This code has been edited through GitHub, not executed inside your Roblox Studio. Game functionality, receipts, UI responsiveness, and final balancing still need in-Studio testing.
