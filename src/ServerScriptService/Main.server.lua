@@ -155,7 +155,8 @@ Players.PlayerAdded:Connect(function(player)
         stage.Value = math.clamp(tonumber(value) or 1, 1, TOTAL + 1)
     elseif not ok then
         warn("Could not load stage:", player.UserId, stored)
-        -- Do not overwrite data after a failed load.
+        -- Do not overwrite data after a failed load; let the player retry.
+        player:Kick("Could not load your progress. Please rejoin.")
         return
     end
     loaded[player] = true
