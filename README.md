@@ -1,45 +1,38 @@
-# 🌈 TROLL OBBY
+# TROLL OBBY v3 🌋
 
-Roblox Studio / Rojo project, with a procedural neon obby and a responsive HUD.
+Roblox/Luau game source synchronized to Studio via **Rojo**.
 
-## Current features
-- 10 colorful stages with jumping platforms, troll traps, lava, and floating stage signs
-- Respawn at checkpoint, stage leaderboard, finish stage
-- DataStore progress saving (when published and API access is enabled)
-- Shop UI: Skip Stage Developer Product and VIP Game Pass (IDs are **0**, so disabled by default)
-- Receipt deduplication with DataStore and server-controlled fulfillment
-- Studio-only test fallback when DataStore API access is not enabled
+## New in v3
+- 30 stages, jumping gaps, lasers, falling and tweened moving platforms
+- Lava ocean, floating islands, glowing crystals and sunset-style lighting
+- Stage checkpoint guard (no more accidentally completing every stage immediately)
+- Tutorial window, progress HUD, missions/milestones, shop, donation panel, settings
+- Developer Product purchase handling and deduplication; configurable VIP game pass
 
-## Update your local project (IMPORTANT)
-Rojo synchronizes **local files**, not files on GitHub. After GitHub edits, download a fresh ZIP with `Code → Download ZIP`, unzip it and use the **new** `roblox-main` folder, or run `git pull` if you cloned the repository using Git.
+**Testing status:** committed to GitHub; still must be played and verified in Roblox Studio. Mission milestones are display-only (no currency rewards yet). Donation purchase IDs default to zero (disabled). Audio, saved settings, 3D animations and thumbnails are not yet included.
 
-**To avoid repeated downloading:** install Git and use these terminal commands in your project folder:
-```sh
-cd ~/Downloads/roblox-main
-# Only if cloned using Git:
+## Update on macOS
+Stop Play in Studio and Rojo in Terminal (Control+C), then:
+```bash
+cd ~/Downloads/troll-obby
 git pull
 ~/Downloads/rojo serve
 ```
-If you originally downloaded ZIP, it is **not** a Git repository: `git pull` will not work. For subsequent updates, clone it once:
-```sh
+Rojo plugin should connect to localhost:34872. If connected to a different local project, disconnect/reconnect.
+Press Play. The map folder **GeneratedObby** appears in Workspace *only during Play*. Look for `TROLL OBBY v3: generated 30 stages` in Output.
+
+If your copy came from a ZIP rather than `git clone`, clone it once and work from the clone:
+```bash
 cd ~/Downloads
 git clone https://github.com/3dqar/roblox.git troll-obby
 cd troll-obby
 ~/Downloads/rojo serve
 ```
-From that point on, stop the Rojo server, run `git pull`, then restart `~/Downloads/rojo serve`. No re-downloading ZIPs.
 
-## Play
-1. Use [Rojo](https://rojo.space/) CLI and Roblox Studio plugin (same version ideally).
-2. In terminal inside this folder run `rojo serve` (or `~/Downloads/rojo serve`).
-3. Open **Baseplate** in Roblox Studio and connect the Rojo plugin to `localhost:34872`.
-4. Press **Play**. The `GeneratedObby` folder is runtime-generated, meaning it **only appears while Play is running**.
-5. If no map: open **Output** with the **Server** filter. Check whether `TROLL OBBY: generated 10 stages` appears or errors are shown. The HUD alone doesn't prove the server script is running.
-6. In Explorer, verify `ServerScriptService > Main` and `ReplicatedStorage > Config`.
+## Publishing / saves
+Save progress requires publishing the experience and enabling Studio API access only for a safe test place. In unpublished Studio mode, the game works without persistent saves. Server logs may still warn if DataStore API access is disabled.
 
 ## Monetization
-1. Publish the experience, create **Developer Product** for Skip Stage and **Game Pass** for VIP in Creator Dashboard.
-2. Enter IDs in `src/ReplicatedStorage/Config.lua`. Until then, purchase buttons show a helpful message.
-3. Test fulfillment in a private published experience, not with real players first.
+Create Developer Products and Game Pass in Roblox Creator Dashboard; put IDs in `src/ReplicatedStorage/Config.lua`. Skip Stage and 3 donation buttons use Developer Product IDs, VIP uses Game Pass ID. Until configured, purchase buttons show a notice instead of opening payment. Test all receipts privately before public launch.
 
-**Notice:** This code has been edited through GitHub, not executed inside your Roblox Studio. Game functionality, receipts, UI responsiveness, and final balancing still need in-Studio testing.
+**Known limitations:** moving anchored platforms might not carry characters smoothly depending on physics; stage balance must be playtested on PC and mobile; donation thank-you effects currently show a notification, not permanent rewards.
