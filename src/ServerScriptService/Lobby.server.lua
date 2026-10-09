@@ -3,6 +3,10 @@ local Players=game:GetService("Players")
 local DSS=game:GetService("DataStoreService")
 local Tween=game:GetService("TweenService")
 local Lighting=game:GetService("Lighting")
+local Run=game:GetService("RunService")
+local cfg=require(game:GetService("ReplicatedStorage"):WaitForChild("Config"))
+local existing=workspace:FindFirstChild("WOW_LOBBY")
+if existing then existing:Destroy() end
 local root=Instance.new("Folder")
 root.Name="WOW_LOBBY"
 root.Parent=workspace
@@ -34,7 +38,22 @@ for i=1,4 do
 end
 for i=1,10 do
     local x=-43+(i-1)*9.5
-    item("RunwayStrip",Vector3.new(1.3,.2,67),Vector3.new(x,3,0),i%2==0 and violet or cyan,Enum.Material.Neon)
+    item("RunwayStrip",Vector3.new(.55,.15,67),Vector3.new(x,3,0),i%2==0 and violet or cyan,Enum.Material.SmoothPlastic)
+end
+-- Low-cost art-deco arches, stepped podiums and landmark sculptures.
+for j=1,5 do
+    local z=-34+(j-1)*15
+    for _,side in ipairs({-1,1}) do
+        local x=side*50
+        item("ArcSupport",Vector3.new(2.5,14,2.5),Vector3.new(x,11,z),violet,Enum.Material.Metal)
+        local glass=item("ArcCrystal",Vector3.new(3.2,5,3.2),Vector3.new(x,20,z),cyan,Enum.Material.Glass)
+        glass.CanCollide=false
+    end
+end
+for j=1,3 do
+    local radius=10-j*2
+    local sculpture=item("CenterSculpture",Vector3.new(radius,2,radius),Vector3.new(0,3+j*1.5,-17),j%2==0 and cyan or violet,Enum.Material.Metal)
+    sculpture.Shape=Enum.PartType.Cylinder
 end
 local portal=item("START_PORTAL",Vector3.new(19,21,2),Vector3.new(0,15,38),cyan,Enum.Material.Neon)
 portal.Transparency=.45
@@ -104,8 +123,10 @@ portal.Touched:Connect(function(hit)
     task.delay(2,function() canEnter[p]=nil end)
 end)
 local ranks,donations
-pcall(function() ranks=DSS:GetOrderedDataStore("TrollObbyV4_BestTime") end)
-pcall(function() donations=DSS:GetOrderedDataStore("TrollObbyV4_SupportTotals") end)
+if not Run:IsStudio() or cfg.StudioDataStores then
+    pcall(function() ranks=DSS:GetOrderedDataStore("TrollObbyV4_BestTime") end)
+    pcall(function() donations=DSS:GetOrderedDataStore("TrollObbyV4_SupportTotals") end)
+end
 local function updateBoard(store,widget,ascending,unit)
     if not store then widget.Text="Leaderboard available after publishing";return end
     local ok,pages=pcall(function() return store:GetSortedAsync(ascending,5) end)
