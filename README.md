@@ -6,14 +6,14 @@ Roblox Studio / Rojo project (30 colorful jumping stages).
 - Rotating red laser hazards and blinking traps alongside previous moving/falling platforms.
 - Coins earned from advancing stages (+10) and reaching the finish (+250).
 - Daily login reward: +75 Coins per UTC day.
-- Four cosmetic companion pets: Spark (free), Cloud (120 coins), Flame (400), Star (900).
+- Character cosmetics replace pets: Rain (free), orbiting Spark (120 Coins), Aura (10 R$), Crown (20 R$), and special Bomz effect (40 R$). Premium effects are Game Passes with IDs initially 0 (disabled).
 - Personal best run time and global TOP-10 speed ranking via OrderedDataStore.
-- Victory dialog and confetti; extra responsive UI for daily rewards, pets, stats, leaderboards.
+- Victory dialog and confetti; extra responsive UI for daily rewards, effects, stats, leaderboards.
 - Existing cinematic intro, tutorial, missions, skip-stage, VIP, support donation buttons still included.
 
 ### What isn't finished yet
 - Supporter Pack pass (not implemented).
-- Coins/pets/daily reward saving requires published experience and functioning DataStore; Studio unpublished mode uses session-only data.
+- Coins/effects/daily reward saving requires published experience and functioning DataStore; Studio unpublished mode uses session-only data.
 - Sounds, fully persistent daily mission payouts, premium pet purchases and TOP-100 scrolling board are not implemented.
 - This version **has not been run inside Roblox Studio**. Test with Play and Output before publishing publicly.
 
@@ -28,3 +28,6 @@ Reconnect the Rojo plugin if necessary. In Studio press Play and look for `TROLL
 
 ## Monetization
 For purchases, create products and passes in Roblox Creator Dashboard and add actual IDs to `src/ReplicatedStorage/Config.lua`. Skip product, donation products and VIP are disabled by default (ID=0). Purchases should only be enabled after private testing.
+
+## Premium cosmetic effects
+Create Game Passes for Aura (10), Crown (20), Bomz (40) in Creator Dashboard. Paste their IDs in `EffectPasses` in `Config.lua`. The suggested VIP price is now 39 Robux and donation tiers 5/15/30, but **Roblox Creator Dashboard prices must be set separately**. The amount shown in code does not set Roblox's actual purchase price. Test ownership and visual effects before publishing.
