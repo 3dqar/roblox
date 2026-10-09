@@ -1,178 +1,215 @@
 local Players = game:GetService("Players")
-local DataStoreService = game:GetService("DataStoreService")
-local MarketplaceService = game:GetService("MarketplaceService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local DSS = game:GetService("DataStoreService")
+local Market = game:GetService("MarketplaceService")
+local Rep = game:GetService("ReplicatedStorage")
+local Run = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
-local Config = require(ReplicatedStorage:WaitForChild("Config"))
-
-local TOTAL = Config.StageCount
-local RunService = game:GetService("RunService")
+local Tween = game:GetService("TweenService")
+local Config = require(Rep:WaitForChild("Config"))
+local N = Config.StageCount
+local remote = Rep:FindFirstChild("ObbyRemote") or Instance.new("RemoteEvent")
+remote.Name = "ObbyRemote"
+remote.Parent = Rep
 local store
-local dataStoreAvailable = false
-local success, result = pcall(function()
-    return DataStoreService:GetDataStore("TrollObby_Progress_v2")
-end)
-if success then
-    store = result
-    dataStoreAvailable = true
-else
-    warn("DataStore unavailable; running without progress persistence:", result)
-end
-local loaded = {}
-local checkpoints = {}
-local saving = {}
-
+local okStore, result = pcall(function() return DSS:GetDataStore("TrollObby_V3") end)
+if okStore then store = result else warn("Datastore unavailable", result) end
+local ready, memoryOnly, saving = {}, {}, {}
+local pads = {}
 local old = workspace:FindFirstChild("GeneratedObby")
 if old then old:Destroy() end
 local world = Instance.new("Folder")
 world.Name = "GeneratedObby"
 world.Parent = workspace
+Lighting.ClockTime = 17
+Lighting.Brightness = 2
+Lighting.Ambient = Color3.fromRGB(95, 78, 154)
+Lighting.OutdoorAmbient = Color3.fromRGB(135, 100, 180)
+local atm = Lighting:FindFirstChildOfClass("Atmosphere") or Instance.new("Atmosphere")
+atm.Density = 0.32
+atm.Color = Color3.fromRGB(192, 135, 255)
+atm.Decay = Color3.fromRGB(88, 62, 140)
+atm.Parent = Lighting
+local bloom = Lighting:FindFirstChild("ObbyBloom") or Instance.new("BloomEffect")
+bloom.Name = "ObbyBloom"
+bloom.Intensity = 0.4
+bloom.Size = 22
+bloom.Threshold = 1.4
+bloom.Parent = Lighting
 
-Lighting.ClockTime = 14.5
-Lighting.Brightness = 3
-Lighting.Ambient = Color3.fromRGB(155, 175, 210)
-local function block(name, size, position, color, material, parent)
+local function part(name, size, cf, color, material)
     local p = Instance.new("Part")
-    p.Name = name
-    p.Anchored = true
-    p.Size = size
-    p.CFrame = CFrame.new(position)
-    p.Color = color
+    p.Name, p.Anchored, p.Size, p.CFrame = name, true, size, cf
     p.Material = material or Enum.Material.SmoothPlastic
-    p.TopSurface = Enum.SurfaceType.Smooth
-    p.BottomSurface = Enum.SurfaceType.Smooth
-    p.Parent = parent or world
+    p.Color = color
+    p.TopSurface, p.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
+    p.Parent = world
     return p
 end
-
-local function killOnTouch(p)
+local function death(p)
     p.Touched:Connect(function(hit)
         local model = hit:FindFirstAncestorOfClass("Model")
         local hum = model and model:FindFirstChildOfClass("Humanoid")
         if hum then hum.Health = 0 end
     end)
 end
-
-local function sign(part, message, offset, size)
+local function billboard(anchor, str, height)
     local gui = Instance.new("BillboardGui")
-    gui.Name = "FloatingLabel"
+    gui.Size = UDim2.fromOffset(190, 55)
+    gui.StudsOffsetWorldSpace = Vector3.new(0, height or 5, 0)
     gui.AlwaysOnTop = true
-    gui.Size = UDim2.fromOffset(size or 190, 55)
-    gui.StudsOffsetWorldSpace = Vector3.new(0, offset or 6, 0)
-    gui.Parent = part
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.fromScale(1, 1)
-    label.BackgroundTransparency = 1
-    label.Text = message
-    label.TextScaled = true
-    label.Font = Enum.Font.GothamBlack
-    label.TextStrokeTransparency = 0
-    label.TextColor3 = Color3.new(1, 1, 1)
-    label.Parent = gui
+    gui.MaxDistance = 80
+    gui.Parent = anchor
+    local txt = Instance.new("TextLabel")
+    txt.Size, txt.BackgroundTransparency = UDim2.fromScale(1, 1), 1
+    txt.Font, txt.TextScaled = Enum.Font.GothamBlack, true
+    txt.TextColor3, txt.TextStrokeTransparency = Color3.new(1, 1, 1), 0.15
+    txt.Text = str
+    txt.Parent = gui
 end
-
-local function setStage(player, n)
-    if not loaded[player] then return end
-    local stat = player:FindFirstChild("leaderstats")
-    local value = stat and stat:FindFirstChild("Stage")
-    if value and n > value.Value then value.Value = math.clamp(n, 1, TOTAL + 1) end
+local function glowOrb(pos, color, scale)
+    local orb = part("FloatingCrystal", Vector3.new(scale, scale, scale), CFrame.new(pos), color, Enum.Material.Neon)
+    orb.Shape = Enum.PartType.Ball
+    orb.CanCollide = false
+    local light = Instance.new("PointLight")
+    light.Brightness, light.Range, light.Color = 0.5, 14, color
+    light.Parent = orb
 end
-
--- Neon floating islands, visible in Studio while Play is running.
-for i = 1, TOTAL + 1 do
-    local z = (i - 1) * 48
-    local island = block("Checkpoint_" .. i, Vector3.new(20, 2, 18),
-        Vector3.new(0, 10, z), Color3.fromRGB(42, 223, 136), Enum.Material.Neon)
-    checkpoints[i] = island
-    block("IslandTrim_" .. i, Vector3.new(21, 1, 19),
-        Vector3.new(0, 8.5, z), Color3.fromRGB(28, 42, 90))
-    sign(island, (i == TOTAL + 1) and "YOU WIN!" or ("STAGE " .. i), 7, 230)
-    island.Touched:Connect(function(hit)
-        local model = hit:FindFirstAncestorOfClass("Model")
-        local player = model and Players:GetPlayerFromCharacter(model)
-        if player then setStage(player, i) end
-    end)
-
-    if i <= TOTAL then
-        local hue = ((i - 1) / TOTAL)
-        local accent = Color3.fromHSV(hue, 0.72, 1)
-        for j = 1, 3 do
-            local x = (j % 2 == 0) and 4 or -4
-            local zpos = z + j * 12
-            local p = block(("Jump_%02d_%d"):format(i, j),
-                Vector3.new(12, 1.8, 11), Vector3.new(x, 10, zpos), accent, Enum.Material.SmoothPlastic)
-            block(("NeonStrip_%02d_%d"):format(i, j),
-                Vector3.new(12, 0.25, 1), Vector3.new(x, 11.05, zpos - 4.6),
-                Color3.fromRGB(240, 246, 255), Enum.Material.Neon)
-            if i % 3 == 0 and j == 2 then
-                -- A red hazard to jump around.
-                local trap = block("TrollTrap_" .. i, Vector3.new(2.5, 0.35, 9),
-                    Vector3.new(x, 11.15, zpos), Color3.fromRGB(255, 60, 100), Enum.Material.Neon)
-                killOnTouch(trap)
-            elseif i % 3 == 1 and j == 2 then
-                -- A thin beam to cross.
-                p.Size = Vector3.new(8, 1.8, 11)
-            end
-        end
-        local lava = block("Lava_" .. i, Vector3.new(62, 1, 46),
-            Vector3.new(0, -4, z + 24), Color3.fromRGB(255, 70, 40), Enum.Material.Neon)
-        killOnTouch(lava)
-    end
-end
-
-local floor = block("SafetyKillPlane", Vector3.new(600, 2, TOTAL * 48 + 400),
-    Vector3.new(0, -30, TOTAL * 24), Color3.fromRGB(60, 25, 50))
-killOnTouch(floor)
-local spawn = workspace:FindFirstChildOfClass("SpawnLocation")
-if spawn then spawn.Transparency = 1; spawn.CanCollide = false end
-
-local function getStage(player)
+local function dataStage(player)
     local stats = player:FindFirstChild("leaderstats")
     return stats and stats:FindFirstChild("Stage")
 end
-
-local function save(player)
-    if not loaded[player] or saving[player] or not dataStoreAvailable then return end
-    local stage = getStage(player)
-    if not stage then return end
-    saving[player] = true
-    local n = stage.Value
-    local ok, err = pcall(function()
-        store:UpdateAsync(tostring(player.UserId), function(old)
-            local data = type(old) == "table" and old or {stage = tonumber(old) or 1, receipts = {}}
-            data.stage = math.max(tonumber(data.stage) or 1, n)
-            data.receipts = data.receipts or {}
-            return data
-        end)
-    end)
-    if not ok then warn("SAVE ERROR:", err) end
-    saving[player] = nil
+local function tp(player, number)
+    local char = player.Character
+    local pad = pads[math.clamp(number, 1, N + 1)]
+    if char and pad and char:FindFirstChild("HumanoidRootPart") then
+        char:PivotTo(pad.CFrame + Vector3.new(0, 6, 0))
+    end
 end
-
-local function teleport(player, value)
-    local character = player.Character
-    local root = character and character:FindFirstChild("HumanoidRootPart")
-    local pad = checkpoints[math.clamp(value, 1, TOTAL + 1)]
-    if root and pad then character:PivotTo(CFrame.new(pad.Position + Vector3.new(0, 5, 0))) end
-end
-
-local function applyVIP(player)
-    if not player:GetAttribute("VIP") then return end
-    local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-    if hum then hum.WalkSpeed = 22 end
-end
-
-local function checkVIP(player)
-    if Config.VipPassId == 0 then return end
-    local ok, owns = pcall(function()
-        return MarketplaceService:UserOwnsGamePassAsync(player.UserId, Config.VipPassId)
-    end)
-    if ok and owns then
-        player:SetAttribute("VIP", true)
-        applyVIP(player)
+local function setStage(player, value)
+    if not ready[player] then return end
+    local stage = dataStage(player)
+    value = math.clamp(value, 1, N + 1)
+    if stage and value > stage.Value then
+        stage.Value = value
+        remote:FireClient(player, "checkpoint", value)
     end
 end
 
+-- Lava ocean replaces the default grey baseplate at runtime.
+local base = workspace:FindFirstChild("Baseplate")
+if base and base:IsA("BasePart") then
+    base.Transparency = 1
+    base.CanCollide = false
+end
+local spawn = workspace:FindFirstChildOfClass("SpawnLocation")
+if spawn then spawn.Transparency = 1; spawn.CanCollide = false end
+local lava = part("LAVA_OCEAN", Vector3.new(1500, 4, N * 60 + 800),
+    CFrame.new(0, -19, N * 28), Color3.fromRGB(255, 69, 66), Enum.Material.Neon)
+death(lava)
+local void = part("VOID_KILL", Vector3.new(3000, 2, N * 60 + 1500),
+    CFrame.new(0, -40, N * 28), Color3.fromRGB(42, 6, 45))
+death(void)
+for i = 1, 70 do
+    local z = (i - 1) * 26
+    local side = i % 2 == 0 and 1 or -1
+    local x = side * (33 + (i % 4) * 8)
+    local rock = part("FloatingIsland_" .. i, Vector3.new(12, 8, 15),
+        CFrame.new(x, 1 + (i % 3) * 4, z), Color3.fromRGB(62, 41, 102), Enum.Material.Slate)
+    rock.CanCollide = false
+    glowOrb(Vector3.new(x, 8 + (i % 3) * 4, z), Color3.fromHSV(i / 70, 0.7, 1), 3)
+end
+
+-- Every stage has gaps; no connected ramps from checkpoint to checkpoint.
+for i = 1, N + 1 do
+    local z = (i - 1) * 56
+    local color = Color3.fromHSV(((i - 1) % 10) / 10, 0.65, 1)
+    local pad = part("Checkpoint_" .. i, Vector3.new(13, 2, 13),
+        CFrame.new(0, 12, z), i == N + 1 and Color3.fromRGB(255, 212, 53) or Color3.fromRGB(53, 224, 143), Enum.Material.Neon)
+    pads[i] = pad
+    part("CheckpointBorder_" .. i, Vector3.new(15, 1, 15),
+        CFrame.new(0, 10.5, z), Color3.fromRGB(39, 32, 83))
+    billboard(pad, i == N + 1 and "🏆 FINISH!" or ("STAGE " .. i), 6)
+    pad.Touched:Connect(function(hit)
+        local model = hit:FindFirstAncestorOfClass("Model")
+        local player = model and Players:GetPlayerFromCharacter(model)
+        if not player or not ready[player] then return end
+        local current = dataStage(player)
+        -- Prevent walking on the nearby later checkpoint and claiming the whole course.
+        if current and i == current.Value + 1 then
+            setStage(player, i)
+        end
+    end)
+    if i <= N then
+        local difficulty = 1 + math.floor((i - 1) / 8)
+        for j = 1, 4 do
+            local x = (j % 2 == 0) and 6 or -6
+            local zstep = z + 11 * j
+            local width = math.max(5.5, 9 - difficulty)
+            local obstacle = part(("Step_%02d_%d"):format(i, j),
+                Vector3.new(width, 1.7, 7.5), CFrame.new(x, 12, zstep), color)
+            if i % 4 == 0 and j == 2 then
+                obstacle.Name = "FallingPlatform"
+                obstacle.Touched:Connect(function(hit)
+                    local model = hit:FindFirstAncestorOfClass("Model")
+                    if model and Players:GetPlayerFromCharacter(model) and not obstacle:GetAttribute("Busy") then
+                        obstacle:SetAttribute("Busy", true)
+                        task.delay(0.65, function()
+                            obstacle.CanCollide = false
+                            obstacle.Transparency = 0.85
+                            task.wait(2.2)
+                            obstacle.CanCollide = true
+                            obstacle.Transparency = 0
+                            obstacle:SetAttribute("Busy", false)
+                        end)
+                    end
+                end)
+            elseif i % 5 == 0 and j == 3 then
+                obstacle.Name = "MovingPlatform"
+                local a = obstacle.CFrame
+                Tween:Create(obstacle, TweenInfo.new(1.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+                    {CFrame = a * CFrame.new(-x * 1.1, 0, 0)}):Play()
+            elseif i % 3 == 0 and j == 2 then
+                local trap = part("Laser_" .. i, Vector3.new(1.5, 2.5, 7.5),
+                    CFrame.new(x, 14, zstep), Color3.fromRGB(255, 65, 89), Enum.Material.Neon)
+                death(trap)
+            end
+            if j == 1 or j == 4 then
+                part("PlatformTrim", Vector3.new(width, 0.3, 1),
+                    CFrame.new(x, 13, zstep - 3.1), Color3.fromRGB(255, 255, 255), Enum.Material.Neon)
+            end
+        end
+    end
+end
+print("TROLL OBBY v3: generated " .. N .. " stages")
+
+local function save(player)
+    if not ready[player] or memoryOnly[player] or not store or saving[player] then return end
+    local stage = dataStage(player)
+    if not stage then return end
+    saving[player] = true
+    local value = stage.Value
+    local ok, err = pcall(function()
+        store:UpdateAsync(tostring(player.UserId), function(old)
+            local d = type(old) == "table" and old or {stage = tonumber(old) or 1, receipts = {}}
+            d.stage = math.max(tonumber(d.stage) or 1, value)
+            d.receipts = d.receipts or {}
+            return d
+        end)
+    end)
+    if not ok then warn("Save failed:", err) end
+    saving[player] = nil
+end
+local function vip(player)
+    if player:GetAttribute("VIP") then
+        local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        if hum then hum.WalkSpeed = 21 end
+    end
+end
+local function checkVIP(player)
+    if Config.VipPassId == 0 then return end
+    local ok, owns = pcall(function() return Market:UserOwnsGamePassAsync(player.UserId, Config.VipPassId) end)
+    if ok and owns then player:SetAttribute("VIP", true); vip(player) end
+end
 Players.PlayerAdded:Connect(function(player)
     local stats = Instance.new("Folder")
     stats.Name = "leaderstats"
@@ -181,90 +218,85 @@ Players.PlayerAdded:Connect(function(player)
     stage.Name = "Stage"
     stage.Value = 1
     stage.Parent = stats
-
-    player.CharacterAdded:Connect(function(character)
-        character:WaitForChild("HumanoidRootPart")
-        while player.Parent and not loaded[player] do task.wait(0.1) end
+    player.CharacterAdded:Connect(function(char)
+        char:WaitForChild("HumanoidRootPart")
+        while player.Parent and not ready[player] do task.wait(0.1) end
         if not player.Parent then return end
         task.wait(0.1)
-        teleport(player, stage.Value)
-        applyVIP(player)
+        tp(player, stage.Value)
+        vip(player)
     end)
-
-    local ok, data = false, "DataStore unavailable"
-    if dataStoreAvailable then
-        ok, data = pcall(function() return store:GetAsync(tostring(player.UserId)) end)
-    end
-    if not ok then
-        warn("LOAD ERROR:", data)
-        -- Allow Studio-only tests even if API access is not enabled.
-        if RunService:IsStudio() then
-            warn("Studio test: saving disabled; publish and enable Studio API services for DataStore.")
-            loaded[player] = "test"
+    if store then
+        local ok, value = pcall(function() return store:GetAsync(tostring(player.UserId)) end)
+        if ok then
+            local saved = type(value) == "table" and value.stage or value
+            stage.Value = math.clamp(tonumber(saved) or 1, 1, N + 1)
+        elseif Run:IsStudio() then
+            memoryOnly[player] = true
+            warn("Studio DataStore disabled; temporary progress only.")
         else
-            player:Kick("Progress cannot load. Please rejoin.")
+            player:Kick("Cannot load progress. Please rejoin.")
             return
         end
     else
-        local value = type(data) == "table" and data.stage or data
-        stage.Value = math.clamp(tonumber(value) or 1, 1, TOTAL + 1)
-        loaded[player] = true
+        memoryOnly[player] = true
     end
-    if player.Character then task.defer(function() teleport(player, stage.Value); applyVIP(player) end) end
+    ready[player] = true
+    if player.Character then task.defer(function() tp(player, stage.Value); vip(player) end) end
     task.spawn(checkVIP, player)
 end)
-
 Players.PlayerRemoving:Connect(function(player)
-    if loaded[player] == true then save(player) end
-    loaded[player] = nil
+    save(player)
+    ready[player], memoryOnly[player] = nil, nil
+end)
+Market.PromptGamePassPurchaseFinished:Connect(function(player, id, purchased)
+    if purchased and id == Config.VipPassId and id ~= 0 then task.spawn(checkVIP, player) end
 end)
 
-MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, id, purchased)
-    if purchased and Config.VipPassId ~= 0 and id == Config.VipPassId then task.spawn(checkVIP, player) end
-end)
-
-MarketplaceService.ProcessReceipt = function(receipt)
-    if Config.SkipStageProductId == 0 or receipt.ProductId ~= Config.SkipStageProductId then
+-- All developer products use ONE ProcessReceipt handler.
+Market.ProcessReceipt = function(receipt)
+    local kind
+    if Config.SkipStageProductId ~= 0 and receipt.ProductId == Config.SkipStageProductId then kind = "skip" end
+    if Config.DonationProductIds then
+        for _, id in ipairs(Config.DonationProductIds) do
+            if id ~= 0 and receipt.ProductId == id then kind = "donation" end
+        end
+    end
+    if not kind then return Enum.ProductPurchaseDecision.NotProcessedYet end
+    local player = Players:GetPlayerByUserId(receipt.PlayerId)
+    if not player or not ready[player] or memoryOnly[player] or not store then
         return Enum.ProductPurchaseDecision.NotProcessedYet
     end
-    local player = Players:GetPlayerByUserId(receipt.PlayerId)
-    if not player or loaded[player] ~= true or not dataStoreAvailable then return Enum.ProductPurchaseDecision.NotProcessedYet end
-    local result
+    local updated
     local ok, err = pcall(function()
-        result = store:UpdateAsync(tostring(receipt.PlayerId), function(old)
-            local data = type(old) == "table" and old or {stage = tonumber(old) or 1, receipts = {}}
-            data.receipts = data.receipts or {}
-            if not data.receipts[receipt.PurchaseId] then
-                local live = getStage(player)
-                local nextStage = math.max(tonumber(data.stage) or 1, live and live.Value or 1)
-                data.stage = math.min(TOTAL + 1, nextStage + 1)
-                data.receipts[receipt.PurchaseId] = true
+        updated = store:UpdateAsync(tostring(receipt.PlayerId), function(old)
+            local d = type(old) == "table" and old or {stage = tonumber(old) or 1, receipts = {}}
+            d.receipts = d.receipts or {}
+            if not d.receipts[receipt.PurchaseId] then
+                if kind == "skip" then
+                    local live = dataStage(player)
+                    d.stage = math.min(N + 1, math.max(tonumber(d.stage) or 1, live and live.Value or 1) + 1)
+                end
+                d.receipts[receipt.PurchaseId] = true
             end
-            return data
+            return d
         end)
     end)
-    if not ok then
-        warn("PURCHASE ERROR:", err)
-        return Enum.ProductPurchaseDecision.NotProcessedYet
-    end
-    if result and result.stage then
-        setStage(player, result.stage)
-        teleport(player, result.stage)
+    if not ok then warn("Receipt failed:", err); return Enum.ProductPurchaseDecision.NotProcessedYet end
+    if kind == "skip" and updated then
+        setStage(player, updated.stage)
+        tp(player, updated.stage)
+    elseif kind == "donation" then
+        remote:FireClient(player, "donation", 1)
     end
     return Enum.ProductPurchaseDecision.PurchaseGranted
 end
-
 task.spawn(function()
-    while task.wait(60) do
-        for _, player in ipairs(Players:GetPlayers()) do
-            if loaded[player] == true then task.spawn(save, player) end
-        end
+    while task.wait(65) do
+        for _, p in ipairs(Players:GetPlayers()) do task.spawn(save, p) end
     end
 end)
 game:BindToClose(function()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if loaded[player] == true then task.spawn(save, player) end
-    end
+    for _, p in ipairs(Players:GetPlayers()) do task.spawn(save, p) end
     task.wait(2)
 end)
-print("TROLL OBBY: generated " .. tostring(TOTAL) .. " stages")
