@@ -5,7 +5,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage:WaitForChild("Config"))
 local progressStore = DSS:GetDataStore("TrollObby_Progress_v1")
-local receiptsStore = DSS:GetDataStore("TrollObby_Receipts_v1")
 local TOTAL = Config.StageCount
 local checkpoints = {}
 local saving = {}
@@ -105,7 +104,9 @@ local function save(player)
     local n = stage and stage.Value or 1
     local ok, err = pcall(function()
         progressStore:UpdateAsync(tostring(player.UserId), function(old)
-            return math.max(type(old) == "number" and old or 1, n)
+            local data = type(old) == "table" and old or {stage = type(old) == "number" and old or 1, processed = {}}
+            data.stage = math.max(tonumber(data.stage) or 1, n)
+            return data
         end)
     end)
     if not ok then warn("Could not save stage:", player.UserId, err) end
@@ -149,8 +150,9 @@ Players.PlayerAdded:Connect(function(player)
     end)
 
     local ok, stored = pcall(progressStore.GetAsync, progressStore, tostring(player.UserId))
-    if ok and type(stored) == "number" then
-        stage.Value = math.clamp(stored, 1, TOTAL + 1)
+    if ok and (type(stored) == "number" or type(stored) == "table") then
+        local value = type(stored) == "table" and stored.stage or stored
+        stage.Value = math.clamp(tonumber(value) or 1, 1, TOTAL + 1)
     elseif not ok then
         warn("Could not load stage:", player.UserId, stored)
         -- Do not overwrite data after a failed load.
