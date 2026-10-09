@@ -1,38 +1,30 @@
-# TROLL OBBY v3 🌋
+# 🌋 TROLL OBBY v4.0
 
-Roblox/Luau game source synchronized to Studio via **Rojo**.
+Roblox Studio / Rojo project (30 colorful jumping stages).
 
-## New in v3
-- 30 stages, jumping gaps, lasers, falling and tweened moving platforms
-- Lava ocean, floating islands, glowing crystals and sunset-style lighting
-- Stage checkpoint guard (no more accidentally completing every stage immediately)
-- Tutorial window, progress HUD, missions/milestones, shop, donation panel, settings
-- Developer Product purchase handling and deduplication; configurable VIP game pass
+## v4 additions
+- Rotating red laser hazards and blinking traps alongside previous moving/falling platforms.
+- Coins earned from advancing stages (+10) and reaching the finish (+250).
+- Daily login reward: +75 Coins per UTC day.
+- Four cosmetic companion pets: Spark (free), Cloud (120 coins), Flame (400), Star (900).
+- Personal best run time and global TOP-10 speed ranking via OrderedDataStore.
+- Victory dialog and confetti; extra responsive UI for daily rewards, pets, stats, leaderboards.
+- Existing cinematic intro, tutorial, missions, skip-stage, VIP, support donation buttons still included.
 
-**Testing status:** committed to GitHub; still must be played and verified in Roblox Studio. Mission milestones are display-only (no currency rewards yet). Donation purchase IDs default to zero (disabled). Audio, saved settings, 3D animations and thumbnails are not yet included.
+### What isn't finished yet
+- Supporter Pack pass (not implemented).
+- Coins/pets/daily reward saving requires published experience and functioning DataStore; Studio unpublished mode uses session-only data.
+- Sounds, fully persistent daily mission payouts, premium pet purchases and TOP-100 scrolling board are not implemented.
+- This version **has not been run inside Roblox Studio**. Test with Play and Output before publishing publicly.
 
-## Update on macOS
-Stop Play in Studio and Rojo in Terminal (Control+C), then:
+## Update macOS
+In Roblox Studio Stop; in Terminal press Control+C, then:
 ```bash
 cd ~/Downloads/troll-obby
 git pull
 ~/Downloads/rojo serve
 ```
-Rojo plugin should connect to localhost:34872. If connected to a different local project, disconnect/reconnect.
-Press Play. The map folder **GeneratedObby** appears in Workspace *only during Play*. Look for `TROLL OBBY v3: generated 30 stages` in Output.
-
-If your copy came from a ZIP rather than `git clone`, clone it once and work from the clone:
-```bash
-cd ~/Downloads
-git clone https://github.com/3dqar/roblox.git troll-obby
-cd troll-obby
-~/Downloads/rojo serve
-```
-
-## Publishing / saves
-Save progress requires publishing the experience and enabling Studio API access only for a safe test place. In unpublished Studio mode, the game works without persistent saves. Server logs may still warn if DataStore API access is disabled.
+Reconnect the Rojo plugin if necessary. In Studio press Play and look for `TROLL OBBY v4: generated 30 stages` in Output.
 
 ## Monetization
-Create Developer Products and Game Pass in Roblox Creator Dashboard; put IDs in `src/ReplicatedStorage/Config.lua`. Skip Stage and 3 donation buttons use Developer Product IDs, VIP uses Game Pass ID. Until configured, purchase buttons show a notice instead of opening payment. Test all receipts privately before public launch.
-
-**Known limitations:** moving anchored platforms might not carry characters smoothly depending on physics; stage balance must be playtested on PC and mobile; donation thank-you effects currently show a notification, not permanent rewards.
+For purchases, create products and passes in Roblox Creator Dashboard and add actual IDs to `src/ReplicatedStorage/Config.lua`. Skip product, donation products and VIP are disabled by default (ID=0). Purchases should only be enabled after private testing.
