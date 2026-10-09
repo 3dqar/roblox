@@ -12,9 +12,13 @@ local query = Instance.new("RemoteFunction")
 query.Name = "V4Query"
 query.Parent = Rep
 local store
-pcall(function() store = DSS:GetDataStore("TrollObbyV4_Player") end)
+if not Run:IsStudio() or cfg.StudioDataStores then
+    pcall(function() store = DSS:GetDataStore("TrollObbyV4_Player") end)
+end
 local rankings
-pcall(function() rankings = DSS:GetOrderedDataStore("TrollObbyV4_BestTime") end)
+if not Run:IsStudio() or cfg.StudioDataStores then
+    pcall(function() rankings = DSS:GetOrderedDataStore("TrollObbyV4_BestTime") end)
+end
 local state = {}
 local owned = {Rain=true, Spark=true, Aura=true, Crown=true, Bomz=true}
 local cost = {Rain=0, Spark=120}
