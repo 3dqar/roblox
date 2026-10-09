@@ -2,6 +2,8 @@
 local Players = game:GetService("Players")
 local Rep = game:GetService("ReplicatedStorage")
 local Tween = game:GetService("TweenService")
+local Market = game:GetService("MarketplaceService")
+local config = require(Rep:WaitForChild("Config"))
 local player = Players.LocalPlayer
 local event = Rep:WaitForChild("V4Event")
 local query = Rep:WaitForChild("V4Query")
@@ -94,10 +96,10 @@ local function popup(name,heading)
     return f
 end
 local daily=popup("Daily","🎁 DAILY REWARD")
-local pets=popup("Pets","🐾 COMPANION PETS")
+local pets=popup("Effects","✨ CHARACTER EFFECTS")
 local leaders=popup("Leaders","🏆 FASTEST PLAYERS")
 local stats=popup("Statistics","📊 YOUR STATS")
-local modalNames={{"🎁",daily},{"🐾",pets},{"🏆",leaders},{"📊",stats}}
+local modalNames={{"🎁",daily},{"✨",pets},{"🏆",leaders},{"📊",stats}}
 for i,v in ipairs(modalNames) do
     button(dock,v[1],UDim2.new((i-1)/4,4,0,5),UDim2.new(.25,-8,0,31),palette.panel,function()
         local current=v[2].Visible
@@ -110,16 +112,27 @@ local dailyStatus=label(daily,"Loading...",UDim2.fromOffset(20,170),UDim2.new(1,
 local dailyBtn=button(daily,"CLAIM +75 🪙",UDim2.new(.12,0,0,260),UDim2.new(.76,0,0,55),palette.mint,function()
     event:FireServer("Daily")
 end)
-local petCosts={Spark=0,Cloud=120,Flame=400,Star=900}
-local petNames={"Spark","Cloud","Flame","Star"}
-local petButtons={}
-label(pets,"Buy with earned coins, then equip your pet!",UDim2.fromOffset(18,63),UDim2.new(1,-36,0,35),13,false)
-for i,name in ipairs(petNames) do
-    local y=100+(i-1)*66
-    local row=frame(pets,name,UDim2.new(0,16,0,y),UDim2.new(1,-32,0,58),palette.panel)
-    label(row,({"✨ ","☁️ ","🔥 ","🌟 "})[i]..name,UDim2.fromOffset(8,4),UDim2.new(.45,0,0,48),17,true)
-    petButtons[name]=button(row,"BUY",UDim2.new(.53,0,0,9),UDim2.new(.43,0,0,40),palette.accent,function()
-        event:FireServer("Pet",name)
+local effectNames={"Rain","Spark","Aura","Crown","Bomz"}
+local effectButtons={}
+local prices={Rain="FREE",Spark="120 COINS",Aura="10 R$",Crown="20 R$",Bomz="40 R$"}
+label(pets,"Effects follow your character. All Robux effects are permanent Game Passes.",UDim2.fromOffset(18,62),UDim2.new(1,-36,0,42),13,false)
+for i,name in ipairs(effectNames) do
+    local y=108+(i-1)*49
+    local row=frame(pets,name,UDim2.new(0,16,0,y),UDim2.new(1,-32,0,44),palette.panel)
+    label(row,({"🌧️ ","✨ ","🔮 ","👑 ","🌀 "})[i]..name,UDim2.fromOffset(8,3),UDim2.new(.43,0,0,37),16,true)
+    effectButtons[name]=button(row,prices[name],UDim2.new(.47,0,0,5),UDim2.new(.5,0,0,34),palette.accent,function()
+        local passId=config.EffectPasses and config.EffectPasses[name]
+        if passId~=nil then
+            if state and state.effects and state.effects[name] then
+                event:FireServer("Effect",name)
+            elseif passId==0 then
+                toast("Game Pass ID not configured")
+            else
+                Market:PromptGamePassPurchase(player,passId)
+            end
+        else
+            event:FireServer("Effect",name)
+        end
     end)
 end
 local leaderboardText=label(leaders,"Loading global records...",UDim2.fromOffset(18,70),UDim2.new(1,-36,0,255),16,false)
@@ -148,13 +161,13 @@ local function update(d)
     dailyStatus.Text=available and "✅ Ready to claim" or "✔ Already claimed today"
     dailyBtn.Text=available and "CLAIM +75 🪙" or "COME BACK TOMORROW"
     dailyBtn.BackgroundColor3=available and palette.mint or palette.panel
-    for _,name in ipairs(petNames) do
-        if d.equipped==name then petButtons[name].Text="EQUIPPED"
-        elseif d.pets and d.pets[name] then petButtons[name].Text="EQUIP"
-        else petButtons[name].Text=tostring(petCosts[name]).." 🪙" end
+    for _,name in ipairs(effectNames) do
+        if d.equipped==name then effectButtons[name].Text="EQUIPPED"
+        elseif d.effects and d.effects[name] then effectButtons[name].Text="EQUIP"
+        else effectButtons[name].Text=prices[name] end
     end
-    statsText.Text=string.format("🪙 Coins: %d\n\n🐾 Equipped pet: %s\n\n🏁 Completed runs: %d\n\n⏱ Best run: %s",
-        d.coins or 0,d.equipped or "Spark",d.finished or 0,
+    statsText.Text=string.format("🪙 Coins: %d\n\n✨ Equipped effect: %s\n\n🏁 Completed runs: %d\n\n⏱ Best run: %s",
+        d.coins or 0,d.equipped or "Rain",d.finished or 0,
         d.bestTime and d.bestTime>0 and (tostring(d.bestTime).." seconds") or "Not yet")
 end
 task.spawn(function()
