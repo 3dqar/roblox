@@ -338,8 +338,7 @@ Market.ProcessReceipt = function(receipt)
                     d.stage = math.min(N + 1, math.max(tonumber(d.stage) or 1, live and live.Value or 1) + 1)
                 end
                 if kind == "donation" then
-                    local priceIndex = table.find(Config.DonationProductIds, receipt.ProductId)
-                    d.supported = (tonumber(d.supported) or 0) + (Config.DonationPrices[priceIndex] or 0)
+                    d.supported = (tonumber(d.supported) or 0) + (tonumber(receipt.CurrencySpent) or 0)
                 end
                 d.receipts[receipt.PurchaseId] = true
             end
