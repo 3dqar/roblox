@@ -16,45 +16,114 @@ pcall(function() store = DSS:GetDataStore("TrollObbyV4_Player") end)
 local rankings
 pcall(function() rankings = DSS:GetOrderedDataStore("TrollObbyV4_BestTime") end)
 local state = {}
-local owned = {Spark = true, Cloud = true, Flame = true, Star = true}
-local cost = {Spark = 0, Cloud = 120, Flame = 400, Star = 900}
-local colors = {Spark = Color3.fromRGB(255, 237, 88), Cloud = Color3.fromRGB(141, 223, 255), Flame = Color3.fromRGB(255, 99, 60), Star = Color3.fromRGB(175, 100, 255)}
+local owned = {Rain=true, Spark=true, Aura=true, Crown=true, Bomz=true}
+local cost = {Rain=0, Spark=120}
+local function ownsPass(p, name)
+    local id = cfg.EffectPasses and cfg.EffectPasses[name]
+    if not id or id == 0 then return false end
+    local ok, result = pcall(function() return Market:UserOwnsGamePassAsync(p.UserId, id) end)
+    return ok and result == true
+end
 local function utcDay() return math.floor(os.time() / 86400) end
 local function sync(p)
     local d = state[p]
     if d then remote:FireClient(p, "State", {
-        coins=d.coins, lastDaily=d.lastDaily, pets=d.pets, equipped=d.equipped,
+        coins=d.coins, lastDaily=d.lastDaily, effects=d.effects, equipped=d.equipped, premium=d.premium,
         bestTime=d.bestTime, finished=d.finished
     }) end
 end
-local function attachPet(p)
-    local d = state[p]
-    local char = p.Character
+local function attachEffect(p)
+    local d=state[p]
+    local char=p.Character
     if not d or not char then return end
-    local root = char:FindFirstChild("HumanoidRootPart")
-    if not root then return end
-    local old = char:FindFirstChild("CompanionPet")
-    if old then old:Destroy() end
-    local pet = Instance.new("Part")
-    pet.Name = "CompanionPet"
-    pet.Size = Vector3.new(1.7, 1.7, 1.7)
-    pet.Shape = Enum.PartType.Ball
-    pet.Material = Enum.Material.Neon
-    pet.Color = colors[d.equipped] or colors.Spark
-    pet.CanCollide, pet.CanTouch, pet.CanQuery, pet.Massless = false, false, false, true
-    pet.Parent = char
-    local light = Instance.new("PointLight")
-    light.Range, light.Brightness, light.Color = 9, 1.2, pet.Color
-    light.Parent = pet
-    pet.CFrame = root.CFrame * CFrame.new(2.6, 1.4, 1.6)
-    local weld = Instance.new("WeldConstraint")
-    weld.Part0, weld.Part1 = root, pet
-    weld.Parent = pet
+    local root=char:FindFirstChild("HumanoidRootPart")
+    local head=char:FindFirstChild("Head")
+    if not root or not head then return end
+    local previous=char:FindFirstChild("CosmeticEffect")
+    if previous then previous:Destroy() end
+    local folder=Instance.new("Folder")
+    folder.Name="CosmeticEffect"
+    folder.Parent=char
+    local name=d.equipped
+    local base=Instance.new("Attachment")
+    base.Name="EffectAnchor"
+    base.Position=Vector3.new(0,2,0)
+    base.Parent=head
+    base.Parent=folder
+    -- Attachments have to be parented to a BasePart; use a non-colliding carrier.
+    local carrier=Instance.new("Part")
+    carrier.Name="EffectCarrier"
+    carrier.Size=Vector3.new(.2,.2,.2)
+    carrier.Transparency=1
+    carrier.CanCollide=false
+    carrier.CanTouch=false
+    carrier.Massless=true
+    carrier.CFrame=head.CFrame*CFrame.new(0,2,0)
+    carrier.Parent=folder
+    local weld=Instance.new("WeldConstraint")
+    weld.Part0=head
+    weld.Part1=carrier
+    weld.Parent=carrier
+    base.Parent=carrier
+    base.Position=Vector3.zero
+    local emitter=Instance.new("ParticleEmitter")
+    emitter.Name=name
+    emitter.Rate=(name=="Rain" and 22 or 14)
+    emitter.Lifetime=NumberRange.new(.7,1.4)
+    emitter.Speed=NumberRange.new(name=="Rain" and 4 or 1, name=="Rain" and 7 or 2)
+    emitter.SpreadAngle=Vector2.new(180,180)
+    emitter.LightEmission=.65
+    emitter.Size=NumberSequence.new(.22)
+    emitter.Parent=base
+    if name=="Rain" then
+        emitter.Color=ColorSequence.new(Color3.fromRGB(115,193,255))
+        emitter.Acceleration=Vector3.new(0,-25,0)
+        emitter.EmissionDirection=Enum.NormalId.Bottom
+    elseif name=="Spark" then
+        emitter.Color=ColorSequence.new(Color3.fromRGB(255,228,95))
+        emitter.Acceleration=Vector3.new(0,2,0)
+    elseif name=="Aura" then
+        emitter.Color=ColorSequence.new(Color3.fromRGB(174,90,255),Color3.fromRGB(76,255,240))
+        emitter.Size=NumberSequence.new(.5)
+    elseif name=="Crown" then
+        emitter.Color=ColorSequence.new(Color3.fromRGB(255,203,60))
+        emitter.Size=NumberSequence.new(.55)
+    elseif name=="Bomz" then
+        emitter.Color=ColorSequence.new(Color3.fromRGB(146,255,88),Color3.fromRGB(175,99,255))
+        emitter.Size=NumberSequence.new(.7)
+        emitter.Rate=32
+    end
+    if name=="Spark" or name=="Crown" or name=="Bomz" then
+        for i=1,3 do
+            local orb=Instance.new("Part")
+            orb.Name="Orbit"
+            orb.Shape=Enum.PartType.Ball
+            orb.Size=Vector3.new(.45,.45,.45)
+            orb.Color=name=="Bomz" and Color3.fromRGB(170,255,70) or Color3.fromRGB(255,216,94)
+            orb.Material=Enum.Material.Neon
+            orb.Anchored=true
+            orb.CanCollide=false
+            orb.CanTouch=false
+            orb.Parent=folder
+        end
+        task.spawn(function()
+            while folder.Parent and root.Parent do
+                local t=os.clock()*2.7
+                for i,orb in ipairs(folder:GetChildren()) do
+                    if orb:IsA("BasePart") and orb.Name=="Orbit" then
+                        local angle=t+i*math.pi*2/3
+                        orb.CFrame=CFrame.new(root.Position+Vector3.new(math.cos(angle)*2.1,1.2+math.sin(t*1.5+i)*.35,math.sin(angle)*2.1))
+                    end
+                end
+                task.wait(.05)
+            end
+        end)
+    end
 end
 local function save(p)
     local d=state[p]
     if not d or not d.loaded or not store then return end
-    local snapshot = {coins=d.coins, lastDaily=d.lastDaily, pets=d.pets, equipped=d.equipped, bestTime=d.bestTime, finished=d.finished}
+    local snapshot = {coins=d.coins, lastDaily=d.lastDaily, effects=d.effects, equipped=d.equipped, bestTime=d.bestTime, finished=d.finished}
     local success, err = pcall(function() store:SetAsync(tostring(p.UserId), snapshot) end)
     if not success then warn("V4 save failed", err) end
 end
@@ -63,16 +132,16 @@ local function leaderboard(p, best)
     pcall(function() rankings:SetAsync(tostring(p.UserId), math.floor(best * 100)) end)
 end
 Players.PlayerAdded:Connect(function(p)
-    local d={coins=0, lastDaily=-1, pets={Spark=true}, equipped="Spark", bestTime=0, finished=0, start=os.clock(), loaded=false}
+    local d={coins=0, lastDaily=-1, effects={Rain=true}, premium={}, equipped="Rain", bestTime=0, finished=0, start=os.clock(), loaded=false}
     state[p]=d
     local ok, value = false, nil
     if store then ok,value=pcall(function() return store:GetAsync(tostring(p.UserId)) end) end
     if ok and type(value)=="table" then
         d.coins=math.max(0, tonumber(value.coins) or 0)
         d.lastDaily=tonumber(value.lastDaily) or -1
-        d.pets=type(value.pets)=="table" and value.pets or {Spark=true}
-        d.pets.Spark=true
-        d.equipped=owned[value.equipped] and d.pets[value.equipped] and value.equipped or "Spark"
+        d.effects=type(value.effects)=="table" and value.effects or {Rain=true}
+        d.effects.Rain=true
+        d.equipped=owned[value.equipped] and d.effects[value.equipped] and value.equipped or "Rain"
         d.bestTime=tonumber(value.bestTime) or 0
         d.finished=tonumber(value.finished) or 0
     elseif not ok and not Run:IsStudio() then
@@ -80,6 +149,11 @@ Players.PlayerAdded:Connect(function(p)
         state[p]=nil
         return
     end
+    for _, name in ipairs({"Aura","Crown","Bomz"}) do
+        d.premium[name]=ownsPass(p,name)
+        if d.premium[name] then d.effects[name]=true end
+    end
+    if not d.effects[d.equipped] then d.equipped="Rain" end
     d.loaded=ok
     local coins=Instance.new("IntValue")
     coins.Name="Coins"
@@ -88,9 +162,9 @@ Players.PlayerAdded:Connect(function(p)
     p.CharacterAdded:Connect(function(c)
         c:WaitForChild("HumanoidRootPart")
         task.wait(.2)
-        attachPet(p)
+        attachEffect(p)
     end)
-    if p.Character then task.defer(function() attachPet(p) end) end
+    if p.Character then task.defer(function() attachEffect(p) end) end
     local stage=p.leaderstats:WaitForChild("Stage")
     stage.Changed:Connect(function(v)
         if not state[p] then return end
@@ -118,7 +192,7 @@ query.OnServerInvoke=function(p,kind)
     local d=state[p]
     if not d then return nil end
     if kind=="state" then
-        return {coins=d.coins, lastDaily=d.lastDaily, pets=d.pets, equipped=d.equipped, bestTime=d.bestTime, finished=d.finished, day=utcDay()}
+        return {coins=d.coins, lastDaily=d.lastDaily, effects=d.effects, equipped=d.equipped, premium=d.premium, bestTime=d.bestTime, finished=d.finished, day=utcDay()}
     elseif kind=="leaders" then
         local result={}
         if rankings then
@@ -141,18 +215,36 @@ remote.OnServerEvent:Connect(function(p,action,arg)
         d.coins+=75
         p.leaderstats.Coins.Value=d.coins
         remote:FireClient(p,"DailyClaimed",75)
-    elseif action=="Pet" and type(arg)=="string" and owned[arg] then
-        if not d.pets[arg] then
+    elseif action=="Effect" and type(arg)=="string" and owned[arg] then
+        if cost[arg] and not d.effects[arg] then
             if d.coins<cost[arg] then return end
             d.coins-=cost[arg]
-            d.pets[arg]=true
+            d.effects[arg]=true
             p.leaderstats.Coins.Value=d.coins
+        elseif not cost[arg] then
+            if not ownsPass(p,arg) then return end
+            d.premium[arg]=true
+            d.effects[arg]=true
         end
         d.equipped=arg
-        attachPet(p)
+        attachEffect(p)
     else return end
     sync(p)
     task.spawn(save,p)
+end)
+Market.PromptGamePassPurchaseFinished:Connect(function(p,passId,purchased)
+    if not purchased or not state[p] then return end
+    for name,id in pairs(cfg.EffectPasses or {}) do
+        if id~=0 and passId==id and ownsPass(p,name) then
+            local d=state[p]
+            d.premium[name]=true
+            d.effects[name]=true
+            d.equipped=name
+            attachEffect(p)
+            sync(p)
+            break
+        end
+    end
 end)
 task.spawn(function()
     while task.wait(90) do
