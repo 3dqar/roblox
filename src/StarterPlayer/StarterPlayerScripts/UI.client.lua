@@ -60,7 +60,7 @@ local function button(parent, name, title, pos, size, color, click)
     b.Name, b.Text, b.Position, b.Size = name, title, pos, size
     b.BackgroundColor3 = color or COLOR.purple
     b.TextColor3 = COLOR.white
-    b.TextSize = 17
+    b.TextSize = 13
     b.Font = Enum.Font.GothamBold
     b.BorderSizePixel = 0
     b.Parent = parent
@@ -89,6 +89,7 @@ local function modal(name, header, height)
 end
 local top = newFrame(gui, "Progress", UDim2.new(0.5, 0, 0, 18), UDim2.new(0.65, 0, 0, 100), COLOR.dark)
 top.AnchorPoint = Vector2.new(0.5, 0)
+top.BackgroundTransparency = 0.12
 outline(top)
 local maxTop = Instance.new("UISizeConstraint")
 maxTop.MaxSize = Vector2.new(390, 100)
@@ -101,11 +102,11 @@ corner(track, 7)
 local bar = newFrame(track, "Fill", UDim2.new(), UDim2.fromScale(0, 1), COLOR.mint)
 corner(bar, 7)
 
-local nav = newFrame(gui, "Navigation", UDim2.new(0.5, 0, 1, -20), UDim2.new(0.78, 0, 0, 46), COLOR.dark)
+local nav = newFrame(gui, "Navigation", UDim2.new(0.5, 0, 1, -20), UDim2.new(0.66, 0, 0, 43), COLOR.dark)
 nav.AnchorPoint = Vector2.new(0.5, 1)
 local navMax = Instance.new("UISizeConstraint")
-navMax.MaxSize = Vector2.new(390, 46)
-navMax.MinSize = Vector2.new(245, 46)
+navMax.MaxSize = Vector2.new(370, 43)
+navMax.MinSize = Vector2.new(255, 43)
 navMax.Parent = nav
 local shop = modal("Shop", "🛒 POWER-UP SHOP", 410)
 local missions = modal("Missions", "🎯 MISSIONS", 375)
@@ -113,12 +114,12 @@ local help = modal("HowToPlay", "👋 WELCOME, PLAYER!", 370)
 local settings = modal("Settings", "⚙️ SETTINGS", 300)
 local donate = modal("Support", "💜 SUPPORT THE GAME", 360)
 local names = {
-    {"SHOP", shop}, {"MISSIONS", missions}, {"SUPPORT", donate}, {"INFO", help}, {"⚙", settings}
+    {"SHOP", shop}, {"QUESTS", missions}, {"SUPPORT", donate}, {"HELP", help}, {"⚙", settings}
 }
 for i, tuple in ipairs(names) do
     local a, target = tuple[1], tuple[2]
     local b = button(nav, "Nav" .. i, a, UDim2.new((i - 1) / #names, 3, 0, 7),
-        UDim2.new(1 / #names, -6, 0, 32), i == 1 and COLOR.purple or COLOR.panel,
+        UDim2.new(1 / #names, -6, 0, 30), i == 1 and COLOR.purple or COLOR.panel,
         function() local visible = target.Visible; hideAll(); target.Visible = not visible end)
     b.TextScaled = true
 end
