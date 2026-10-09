@@ -80,7 +80,7 @@ local function sendToLobby(p)
     end
 end
 Players.PlayerAdded:Connect(function(p)
-    p:SetAttribute("InLobby",true)
+    if p:GetAttribute("InLobby")==nil then p:SetAttribute("InLobby",true) end
     p.CharacterAdded:Connect(function() task.wait(.35);sendToLobby(p) end)
     if p.Character then task.defer(sendToLobby,p) end
 end)
@@ -93,10 +93,13 @@ portal.Touched:Connect(function(hit)
     task.wait(.1)
     local stage=p:FindFirstChild("leaderstats")
     stage=stage and stage:FindFirstChild("Stage")
-    local map=workspace:FindFirstChild("GeneratedObby")
-    local pad=map and map:FindFirstChild("Checkpoint_"..tostring(stage and stage.Value or 1))
+    local map=workspace:WaitForChild("GeneratedObby",10)
+    local pad=map and map:WaitForChild("Checkpoint_"..tostring(stage and stage.Value or 1),10)
     if pad and p.Character then
         p.Character:PivotTo(pad.CFrame*CFrame.new(0,6,0))
+    else
+        p:SetAttribute("InLobby",true)
+        sendToLobby(p)
     end
     task.delay(2,function() canEnter[p]=nil end)
 end)
