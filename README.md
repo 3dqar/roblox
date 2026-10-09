@@ -38,3 +38,13 @@ Players spawn in a floating neon lobby with glowing crystals, lit walkways, a po
 Game Pass / Donation Product IDs remain set to 0 by default. No actual Robux payments can occur until configured and published. The lobby generator is in `src/ServerScriptService/Lobby.server.lua`; portal leads from `WOW_LOBBY` to `GeneratedObby`.
 
 **Testing needed:** This was committed from GitHub but not run inside your Roblox Studio. Check collision/physics of lobby plaza, portal activation, correct checkpoint respawn, DataStore permissions, TOP boards, mobile performance and lighting before making the place public.
+
+## Polish pass: lobby + more balanced platforming
+- Crystal gate landmarks every five stages, slightly easier lateral gaps (still require jumping), more recognizable routes.
+- Architectural arches and center sculpture in lobby; dimmer, more compact navigation.
+- In default Studio mode, DataStore is intentionally **not accessed** to avoid error spam. To test persistent storage with a published *test* place and API permissions enabled, change `StudioDataStores` to `true` in `Config.lua`. Live published servers still use DataStore.
+- TOP SUPPORTERS now counts `CurrencySpent` on successful configured donation-product receipts; it does not count game passes, nor older purchases before the tracking logic existed.
+- Project code has been verified on GitHub, **not yet playtested in Roblox Studio**; check portal and checkpoint respawn, jump reachability, and mobile UI.
+
+## Optional free Creator Store assets
+Search in Creator Store for **low-poly floating rocks**, **stylized fantasy trees**, **neon sci-fi portal**, **cartoon clouds**, **obby sound effects**, and **ambient synth music**. Prefer assets without Scripts or LocalScripts and verify creator/license permissions. Put *decorative* models in Workspace outside `GeneratedObby` (which is regenerated at runtime); don't use unreviewed free models with executable scripts. Only use royalty-free audio allowed for Roblox experiences.
