@@ -101,11 +101,11 @@ corner(track, 7)
 local bar = newFrame(track, "Fill", UDim2.new(), UDim2.fromScale(0, 1), COLOR.mint)
 corner(bar, 7)
 
-local nav = newFrame(gui, "Navigation", UDim2.new(0.5, 0, 1, -20), UDim2.new(0.9, 0, 0, 58), COLOR.dark)
+local nav = newFrame(gui, "Navigation", UDim2.new(0.5, 0, 1, -20), UDim2.new(0.78, 0, 0, 46), COLOR.dark)
 nav.AnchorPoint = Vector2.new(0.5, 1)
 local navMax = Instance.new("UISizeConstraint")
-navMax.MaxSize = Vector2.new(455, 58)
-navMax.MinSize = Vector2.new(280, 58)
+navMax.MaxSize = Vector2.new(390, 46)
+navMax.MinSize = Vector2.new(245, 46)
 navMax.Parent = nav
 local shop = modal("Shop", "🛒 POWER-UP SHOP", 410)
 local missions = modal("Missions", "🎯 MISSIONS", 375)
@@ -117,8 +117,8 @@ local names = {
 }
 for i, tuple in ipairs(names) do
     local a, target = tuple[1], tuple[2]
-    local b = button(nav, "Nav" .. i, a, UDim2.new((i - 1) / #names, 4, 0, 9),
-        UDim2.new(1 / #names, -8, 0, 40), i == 1 and COLOR.purple or COLOR.panel,
+    local b = button(nav, "Nav" .. i, a, UDim2.new((i - 1) / #names, 3, 0, 7),
+        UDim2.new(1 / #names, -6, 0, 32), i == 1 and COLOR.purple or COLOR.panel,
         function() local visible = target.Visible; hideAll(); target.Visible = not visible end)
     b.TextScaled = true
 end
@@ -207,6 +207,50 @@ remote.OnClientEvent:Connect(function(kind, value)
     if kind == "checkpoint" then notify("✅ STAGE " .. value .. " UNLOCKED!")
     elseif kind == "donation" then notify("💜 THANK YOU FOR SUPPORTING!") end
 end)
-task.delay(1, function()
-    if not player:GetAttribute("TutorialSeen") then hideAll(); help.Visible = true end
+-- Camera flyover on first join in this session, then open tutorial.
+local camera = workspace.CurrentCamera
+local function playIntro()
+    if player:GetAttribute("IntroSeen") then return end
+    player:SetAttribute("IntroSeen", true)
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:WaitForChild("Humanoid", 5)
+    if not humanoid then return end
+    local priorSpeed = humanoid.WalkSpeed
+    local priorJump = humanoid.JumpPower
+    local priorJumpHeight = humanoid.JumpHeight
+    humanoid.WalkSpeed = 0
+    humanoid.JumpPower = 0
+    humanoid.JumpHeight = 0
+    hideAll()
+    camera.CameraType = Enum.CameraType.Scriptable
+    local points = {
+        CFrame.lookAt(Vector3.new(35, 55, -24), Vector3.new(0, 12, 35)),
+        CFrame.lookAt(Vector3.new(-26, 39, 180), Vector3.new(0, 12, 220)),
+        CFrame.lookAt(Vector3.new(28, 43, 470), Vector3.new(0, 12, 510)),
+        CFrame.lookAt(Vector3.new(24, 29, 30), Vector3.new(0, 12, 0)),
+    }
+    camera.CFrame = points[1]
+    for i = 2, #points do
+        local tween = Tween:Create(camera, TweenInfo.new(1.75, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {CFrame = points[i]})
+        tween:Play()
+        tween.Completed:Wait()
+    end
+    if camera then
+        camera.CameraType = Enum.CameraType.Custom
+        camera.CameraSubject = humanoid
+    end
+    if humanoid.Parent then
+        humanoid.WalkSpeed = priorSpeed
+        humanoid.JumpPower = priorJump
+        humanoid.JumpHeight = priorJumpHeight
+    end
+    if not player:GetAttribute("TutorialSeen") then help.Visible = true end
+end
+task.delay(1.2, function()
+    local ok, err = pcall(playIntro)
+    if not ok then
+        warn("Intro failed:", err)
+        camera.CameraType = Enum.CameraType.Custom
+        if not player:GetAttribute("TutorialSeen") then help.Visible = true end
+    end
 end)
