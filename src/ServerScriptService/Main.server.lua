@@ -103,7 +103,7 @@ local function tp(player, number)
     end
 end
 local function setStage(player, value)
-    if not ready[player] then return end
+    if not ready[player] or player:GetAttribute("InLobby") then return end
     local stage = dataStage(player)
     value = math.clamp(value, 1, N + 1)
     if stage and value > stage.Value then
@@ -270,7 +270,7 @@ Players.PlayerAdded:Connect(function(player)
         while player.Parent and not ready[player] do task.wait(0.1) end
         if not player.Parent then return end
         task.wait(0.1)
-        tp(player, stage.Value)
+        if not player:GetAttribute("InLobby") then tp(player, stage.Value) end
         vip(player)
     end)
     if store then
@@ -289,7 +289,10 @@ Players.PlayerAdded:Connect(function(player)
         memoryOnly[player] = true
     end
     ready[player] = true
-    if player.Character then task.defer(function() tp(player, stage.Value); vip(player) end) end
+    if player.Character then task.defer(function()
+        if not player:GetAttribute("InLobby") then tp(player, stage.Value) end
+        vip(player)
+    end) end
     task.spawn(checkVIP, player)
 end)
 Players.PlayerRemoving:Connect(function(player)
@@ -324,6 +327,10 @@ Market.ProcessReceipt = function(receipt)
                     local live = dataStage(player)
                     d.stage = math.min(N + 1, math.max(tonumber(d.stage) or 1, live and live.Value or 1) + 1)
                 end
+                if kind == "donation" then
+                    local priceIndex = table.find(Config.DonationProductIds, receipt.ProductId)
+                    d.supported = (tonumber(d.supported) or 0) + (Config.DonationPrices[priceIndex] or 0)
+                end
                 d.receipts[receipt.PurchaseId] = true
             end
             return d
@@ -334,6 +341,13 @@ Market.ProcessReceipt = function(receipt)
         setStage(player, updated.stage)
         tp(player, updated.stage)
     elseif kind == "donation" then
+        local total = tonumber(updated and updated.supported) or 0
+        task.spawn(function()
+            local good, err = pcall(function()
+                DSS:GetOrderedDataStore("TrollObbyV4_SupportTotals"):SetAsync(tostring(receipt.PlayerId), total)
+            end)
+            if not good then warn("Support leaderboard update failed:", err) end
+        end)
         remote:FireClient(player, "donation", 1)
     end
     return Enum.ProductPurchaseDecision.PurchaseGranted
