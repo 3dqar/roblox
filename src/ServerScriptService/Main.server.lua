@@ -6,7 +6,18 @@ local Lighting = game:GetService("Lighting")
 local Config = require(ReplicatedStorage:WaitForChild("Config"))
 
 local TOTAL = Config.StageCount
-local store = DataStoreService:GetDataStore("TrollObby_Progress_v2")
+local RunService = game:GetService("RunService")
+local store
+local dataStoreAvailable = false
+local success, result = pcall(function()
+    return DataStoreService:GetDataStore("TrollObby_Progress_v2")
+end)
+if success then
+    store = result
+    dataStoreAvailable = true
+else
+    warn("DataStore unavailable; running without progress persistence:", result)
+end
 local loaded = {}
 local checkpoints = {}
 local saving = {}
@@ -123,7 +134,7 @@ local function getStage(player)
 end
 
 local function save(player)
-    if not loaded[player] or saving[player] then return end
+    if not loaded[player] or saving[player] or not dataStoreAvailable then return end
     local stage = getStage(player)
     if not stage then return end
     saving[player] = true
@@ -182,11 +193,14 @@ Players.PlayerAdded:Connect(function(player)
         applyVIP(player)
     end)
 
-    local ok, data = pcall(function() return store:GetAsync(tostring(player.UserId)) end)
+    local ok, data = false, "DataStore unavailable"
+    if dataStoreAvailable then
+        ok, data = pcall(function() return store:GetAsync(tostring(player.UserId)) end)
+    end
     if not ok then
         warn("LOAD ERROR:", data)
         -- Allow Studio-only tests even if API access is not enabled.
-        if game:GetService("RunService"):IsStudio() then
+        if RunService:IsStudio() then
             warn("Studio test: saving disabled; publish and enable Studio API services for DataStore.")
             loaded[player] = "test"
         else
@@ -216,7 +230,7 @@ MarketplaceService.ProcessReceipt = function(receipt)
         return Enum.ProductPurchaseDecision.NotProcessedYet
     end
     local player = Players:GetPlayerByUserId(receipt.PlayerId)
-    if not player or loaded[player] ~= true then return Enum.ProductPurchaseDecision.NotProcessedYet end
+    if not player or loaded[player] ~= true or not dataStoreAvailable then return Enum.ProductPurchaseDecision.NotProcessedYet end
     local result
     local ok, err = pcall(function()
         result = store:UpdateAsync(tostring(receipt.PlayerId), function(old)
