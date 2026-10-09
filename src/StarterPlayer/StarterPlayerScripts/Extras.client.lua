@@ -1,0 +1,188 @@
+-- TROLL OBBY v4 extras: daily gifts, pets, leaderboard and victory celebration.
+local Players = game:GetService("Players")
+local Rep = game:GetService("ReplicatedStorage")
+local Tween = game:GetService("TweenService")
+local player = Players.LocalPlayer
+local event = Rep:WaitForChild("V4Event")
+local query = Rep:WaitForChild("V4Query")
+local gui = Instance.new("ScreenGui")
+gui.Name="ObbyV4"
+gui.ResetOnSpawn=false
+gui.IgnoreGuiInset=true
+gui.DisplayOrder=10
+gui.Parent=player:WaitForChild("PlayerGui")
+local palette={dark=Color3.fromRGB(18,24,51),panel=Color3.fromRGB(37,44,80),accent=Color3.fromRGB(120,91,237),mint=Color3.fromRGB(52,218,152),white=Color3.fromRGB(252,252,255)}
+local function round(obj,r)
+    local c=Instance.new("UICorner")
+    c.CornerRadius=UDim.new(0,r or 12)
+    c.Parent=obj
+end
+local function frame(parent,name,pos,size,bg)
+    local v=Instance.new("Frame")
+    v.Name,v.Position,v.Size=name,pos,size
+    v.BackgroundColor3=bg or palette.dark
+    v.BorderSizePixel=0
+    v.Parent=parent
+    round(v,15)
+    return v
+end
+local function label(parent,value,pos,size,fontSize,bold)
+    local v=Instance.new("TextLabel")
+    v.BackgroundTransparency=1
+    v.Text=value
+    v.TextWrapped=true
+    v.TextColor3=palette.white
+    v.Font=bold and Enum.Font.GothamBold or Enum.Font.Gotham
+    v.TextSize=fontSize or 16
+    v.Position,v.Size=pos,size
+    v.Parent=parent
+    return v
+end
+local function button(parent,value,pos,size,color,cb)
+    local b=Instance.new("TextButton")
+    b.Position,b.Size=pos,size
+    b.BackgroundColor3=color or palette.accent
+    b.TextColor3=palette.white
+    b.Font=Enum.Font.GothamBold
+    b.TextSize=15
+    b.Text=value
+    b.BorderSizePixel=0
+    b.Parent=parent
+    round(b,10)
+    b.Activated:Connect(cb)
+    return b
+end
+local notify=label(gui,"",UDim2.new(.5,-165,0,130),UDim2.fromOffset(330,50),18,true)
+notify.BackgroundColor3=palette.dark
+notify.BackgroundTransparency=.08
+notify.Visible=false
+round(notify,12)
+local messageSequence=0
+local function toast(message)
+    messageSequence+=1
+    local id=messageSequence
+    notify.Text=message
+    notify.Visible=true
+    task.delay(3.5,function()
+        if messageSequence==id then notify.Visible=false end
+    end)
+end
+
+-- Floating quick-access dock above the existing bottom menu
+local dock=frame(gui,"ExtrasDock",UDim2.new(.5,0,1,-92),UDim2.new(.72,0,0,42))
+dock.AnchorPoint=Vector2.new(.5,1)
+dock.BackgroundTransparency=.05
+local dockLimit=Instance.new("UISizeConstraint")
+dockLimit.MinSize=Vector2.new(240,42)
+dockLimit.MaxSize=Vector2.new(410,42)
+dockLimit.Parent=dock
+local views={}
+local function closeViews()
+    for _,f in pairs(views) do f.Visible=false end
+end
+local function popup(name,heading)
+    local f=frame(gui,name,UDim2.fromScale(.5,.5),UDim2.new(.9,0,0,390))
+    f.AnchorPoint=Vector2.new(.5,.5)
+    local max=Instance.new("UISizeConstraint")
+    max.MinSize=Vector2.new(270,390)
+    max.MaxSize=Vector2.new(440,390)
+    max.Parent=f
+    f.Visible=false
+    views[name]=f
+    label(f,heading,UDim2.fromOffset(18,15),UDim2.new(1,-85,0,45),21,true)
+    button(f,"✕",UDim2.new(1,-51,0,18),UDim2.fromOffset(35,34),palette.panel,function() f.Visible=false end)
+    return f
+end
+local daily=popup("Daily","🎁 DAILY REWARD")
+local pets=popup("Pets","🐾 COMPANION PETS")
+local leaders=popup("Leaders","🏆 FASTEST PLAYERS")
+local stats=popup("Statistics","📊 YOUR STATS")
+local modalNames={{"🎁",daily},{"🐾",pets},{"🏆",leaders},{"📊",stats}}
+for i,v in ipairs(modalNames) do
+    button(dock,v[1],UDim2.new((i-1)/4,4,0,5),UDim2.new(.25,-8,0,31),palette.panel,function()
+        local current=v[2].Visible
+        closeViews()
+        v[2].Visible=not current
+    end)
+end
+label(daily,"Collect 75 free coins once per UTC day!",UDim2.fromOffset(20,75),UDim2.new(1,-40,0,70),18,false)
+local dailyStatus=label(daily,"Loading...",UDim2.fromOffset(20,170),UDim2.new(1,-40,0,50),19,true)
+local dailyBtn=button(daily,"CLAIM +75 🪙",UDim2.new(.12,0,0,260),UDim2.new(.76,0,0,55),palette.mint,function()
+    event:FireServer("Daily")
+end)
+local petCosts={Spark=0,Cloud=120,Flame=400,Star=900}
+local petNames={"Spark","Cloud","Flame","Star"}
+local petButtons={}
+label(pets,"Buy with earned coins, then equip your pet!",UDim2.fromOffset(18,63),UDim2.new(1,-36,0,35),13,false)
+for i,name in ipairs(petNames) do
+    local y=100+(i-1)*66
+    local row=frame(pets,name,UDim2.new(0,16,0,y),UDim2.new(1,-32,0,58),palette.panel)
+    label(row,({"✨ ","☁️ ","🔥 ","🌟 "})[i]..name,UDim2.fromOffset(8,4),UDim2.new(.45,0,0,48),17,true)
+    petButtons[name]=button(row,"BUY",UDim2.new(.53,0,0,9),UDim2.new(.43,0,0,40),palette.accent,function()
+        event:FireServer("Pet",name)
+    end)
+end
+local leaderboardText=label(leaders,"Loading global records...",UDim2.fromOffset(18,70),UDim2.new(1,-36,0,255),16,false)
+button(leaders,"REFRESH",UDim2.new(.2,0,1,-58),UDim2.new(.6,0,0,40),palette.mint,function()
+    task.spawn(function()
+        local ok,result=pcall(function() return query:InvokeServer("leaders") end)
+        if not ok or not result or #result==0 then leaderboardText.Text="No records yet. Be first to finish!" return end
+        local lines={}
+        for i,item in ipairs(result) do
+            local name="Player "..tostring(item.userId)
+            local success,res=pcall(function() return Players:GetNameFromUserIdAsync(item.userId) end)
+            if success then name=res end
+            table.insert(lines,string.format("%d. %s — %ds",i,name,item.seconds))
+        end
+        leaderboardText.Text=table.concat(lines,"\n")
+    end)
+end)
+local statsText=label(stats,"Loading...",UDim2.fromOffset(18,80),UDim2.new(1,-36,0,230),18,false)
+
+local state
+local function update(d)
+    state=d
+    if not d then return end
+    local today=math.floor(os.time()/86400)
+    local available=(d.lastDaily or -1)<today
+    dailyStatus.Text=available and "✅ Ready to claim" or "✔ Already claimed today"
+    dailyBtn.Text=available and "CLAIM +75 🪙" or "COME BACK TOMORROW"
+    dailyBtn.BackgroundColor3=available and palette.mint or palette.panel
+    for _,name in ipairs(petNames) do
+        if d.equipped==name then petButtons[name].Text="EQUIPPED"
+        elseif d.pets and d.pets[name] then petButtons[name].Text="EQUIP"
+        else petButtons[name].Text=tostring(petCosts[name]).." 🪙" end
+    end
+    statsText.Text=string.format("🪙 Coins: %d\n\n🐾 Equipped pet: %s\n\n🏁 Completed runs: %d\n\n⏱ Best run: %s",
+        d.coins or 0,d.equipped or "Spark",d.finished or 0,
+        d.bestTime and d.bestTime>0 and (tostring(d.bestTime).." seconds") or "Not yet")
+end
+task.spawn(function()
+    local ok,d=pcall(function() return query:InvokeServer("state") end)
+    if ok then update(d) end
+end)
+
+local function victory(seconds)
+    local win=frame(gui,"Victory",UDim2.fromScale(.5,.5),UDim2.new(.85,0,0,230))
+    win.AnchorPoint=Vector2.new(.5,.5)
+    local limit=Instance.new("UISizeConstraint")
+    limit.MaxSize=Vector2.new(450,230)
+    limit.Parent=win
+    label(win,"🏆 YOU DID IT! 🎉",UDim2.fromOffset(10,24),UDim2.new(1,-20,0,65),29,true)
+    label(win,"Finished in "..tostring(seconds).." seconds! +250 coins",UDim2.fromOffset(15,95),UDim2.new(1,-30,0,55),17,false)
+    button(win,"AWESOME!",UDim2.new(.2,0,1,-60),UDim2.new(.6,0,0,43),palette.mint,function() win:Destroy() end)
+    for i=1,28 do
+        local square=frame(gui,"Confetti",UDim2.fromScale(math.random(),-.07),UDim2.fromOffset(8,13),
+            Color3.fromHSV(math.random(),.8,1))
+        local tween=Tween:Create(square,TweenInfo.new(math.random(15,32)/10,Enum.EasingStyle.Quad),{
+            Position=UDim2.fromScale(math.random(),1.04),Rotation=math.random(-360,360)})
+        tween:Play()
+        tween.Completed:Connect(function() square:Destroy() end)
+    end
+end
+event.OnClientEvent:Connect(function(kind,value)
+    if kind=="State" then update(value)
+    elseif kind=="CoinsEarned" then toast("🪙 +"..tostring(value).." Coins!")
+    elseif kind=="DailyClaimed" then toast("🎁 Daily reward: +"..tostring(value).." Coins!")
+    elseif kind=="Victory" then victory(value) end
+end)
