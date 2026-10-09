@@ -145,7 +145,16 @@ for i = 1, N + 1 do
     pads[i] = pad
     part("CheckpointBorder_" .. i, Vector3.new(15, 1, 15),
         CFrame.new(0, 10.5, z), Color3.fromRGB(39, 32, 83))
-    billboard(pad, i == N + 1 and "🏆 FINISH!" or ("STAGE " .. i), 6)
+    billboard(pad, i == N + 1 and "FINISH!" or ("STAGE " .. i), 6)
+    if i % 5 == 1 then
+        local archColor = Color3.fromHSV(((i - 1) % 10) / 10, .75, 1)
+        for _,side in ipairs({-1,1}) do
+            part("CrystalGateColumn_" .. i, Vector3.new(2, 16, 2), CFrame.new(side * 12, 19, z), archColor, Enum.Material.Glass)
+            local lightBlock = part("CrystalGateLantern_" .. i, Vector3.new(3, 3, 3), CFrame.new(side * 12, 28, z), archColor, Enum.Material.Neon)
+            lightBlock.Shape = Enum.PartType.Ball
+        end
+        part("CrystalGateBridge_" .. i, Vector3.new(26, 2, 2), CFrame.new(0, 29.5, z), Color3.fromRGB(92, 68, 184), Enum.Material.Metal)
+    end
     pad.Touched:Connect(function(hit)
         local model = hit:FindFirstAncestorOfClass("Model")
         local player = model and Players:GetPlayerFromCharacter(model)
@@ -159,11 +168,11 @@ for i = 1, N + 1 do
     if i <= N then
         local difficulty = 1 + math.floor((i - 1) / 8)
         for j = 1, 4 do
-            local x = (j % 2 == 0) and 6 or -6
+            local x = (j % 2 == 0) and 2.8 or -2.8
             local zstep = z + 11 * j
-            local width = math.max(5.5, 9 - difficulty)
+            local width = math.max(5.4, 10 - difficulty)
             local obstacle = part(("Step_%02d_%d"):format(i, j),
-                Vector3.new(width, 1.7, 7.5), CFrame.new(x, 12, zstep), color)
+                Vector3.new(width, 1.7, 8.4), CFrame.new(x, 12, zstep), color)
             if i % 4 == 0 and j == 2 then
                 obstacle.Name = "FallingPlatform"
                 obstacle.Touched:Connect(function(hit)
@@ -192,7 +201,7 @@ for i = 1, N + 1 do
             end
             if j == 1 or j == 4 then
                 part("PlatformTrim", Vector3.new(width, 0.3, 1),
-                    CFrame.new(x, 13, zstep - 3.1), Color3.fromRGB(255, 255, 255), Enum.Material.Neon)
+                    CFrame.new(x, 13, zstep - 3.7), Color3.fromRGB(255, 255, 255), Enum.Material.Neon)
             end
         end
     end
