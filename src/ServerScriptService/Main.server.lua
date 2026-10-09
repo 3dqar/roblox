@@ -197,7 +197,37 @@ for i = 1, N + 1 do
         end
     end
 end
-print("TROLL OBBY v3: generated " .. N .. " stages")
+-- New troll mechanics every few stages: rotating hazard bars and disappearing tiles.
+for stageIndex = 1, N do
+    local z = (stageIndex - 1) * 56
+    if stageIndex % 6 == 0 then
+        local laser = part("RotatingLaser_" .. stageIndex, Vector3.new(16, 0.9, 1.1),
+            CFrame.new(0, 15, z + 28), Color3.fromRGB(255, 52, 110), Enum.Material.Neon)
+        death(laser)
+        task.spawn(function()
+            local angle = 0
+            while laser.Parent do
+                local dt = Run.Heartbeat:Wait()
+                angle += dt * 1.7
+                laser.CFrame = CFrame.new(0, 15, z + 28) * CFrame.Angles(0, angle, 0)
+            end
+        end)
+    elseif stageIndex % 7 == 0 then
+        local platform = part("BlinkTrap_" .. stageIndex, Vector3.new(6, 1.5, 8),
+            CFrame.new(6, 12, z + 22), Color3.fromRGB(151, 95, 255), Enum.Material.Neon)
+        task.spawn(function()
+            while platform.Parent do
+                task.wait(1.6)
+                platform.Transparency = 0.82
+                platform.CanCollide = false
+                task.wait(0.9)
+                platform.CanCollide = true
+                platform.Transparency = 0
+            end
+        end)
+    end
+end
+print("TROLL OBBY v4: generated " .. N .. " stages")
 
 local function save(player)
     if not ready[player] or memoryOnly[player] or not store or saving[player] then return end
