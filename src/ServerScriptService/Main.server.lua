@@ -20,21 +20,38 @@ if old then old:Destroy() end
 local world = Instance.new("Folder")
 world.Name = "GeneratedObby"
 world.Parent = workspace
-Lighting.ClockTime = 17
-Lighting.Brightness = 2
-Lighting.Ambient = Color3.fromRGB(95, 78, 154)
-Lighting.OutdoorAmbient = Color3.fromRGB(135, 100, 180)
+Lighting.ClockTime = 17.2
+Lighting.Brightness = 2.2
+Lighting.Ambient = Color3.fromRGB(110, 95, 165)
+Lighting.OutdoorAmbient = Color3.fromRGB(140, 120, 185)
 local atm = Lighting:FindFirstChildOfClass("Atmosphere") or Instance.new("Atmosphere")
-atm.Density = 0.32
-atm.Color = Color3.fromRGB(192, 135, 255)
-atm.Decay = Color3.fromRGB(88, 62, 140)
+atm.Density = 0.12
+atm.Haze = 0.5
+atm.Glare = 0
+atm.Color = Color3.fromRGB(205, 170, 255)
+atm.Decay = Color3.fromRGB(92, 72, 145)
 atm.Parent = Lighting
 local bloom = Lighting:FindFirstChild("ObbyBloom") or Instance.new("BloomEffect")
 bloom.Name = "ObbyBloom"
-bloom.Intensity = 0.4
-bloom.Size = 22
-bloom.Threshold = 1.4
+bloom.Intensity = 0.1
+bloom.Size = 10
+bloom.Threshold = 2
 bloom.Parent = Lighting
+local sun = Lighting:FindFirstChild("ObbySun") or Instance.new("SunRaysEffect")
+sun.Name = "ObbySun"
+sun.Intensity = 0.045
+sun.Spread = 0.16
+sun.Parent = Lighting
+local cc = Lighting:FindFirstChild("ObbyColor") or Instance.new("ColorCorrectionEffect")
+cc.Name = "ObbyColor"
+cc.Contrast = 0.07
+cc.Saturation = 0.08
+cc.Brightness = 0
+cc.Parent = Lighting
+local sky = Lighting:FindFirstChildOfClass("Sky") or Instance.new("Sky")
+sky.StarCount = 0
+sky.CelestialBodiesShown = true
+sky.Parent = Lighting
 
 local function part(name, size, cf, color, material)
     local p = Instance.new("Part")
@@ -104,7 +121,7 @@ end
 local spawn = workspace:FindFirstChildOfClass("SpawnLocation")
 if spawn then spawn.Transparency = 1; spawn.CanCollide = false end
 local lava = part("LAVA_OCEAN", Vector3.new(1500, 4, N * 60 + 800),
-    CFrame.new(0, -19, N * 28), Color3.fromRGB(255, 69, 66), Enum.Material.Neon)
+    CFrame.new(0, -19, N * 28), Color3.fromRGB(235, 78, 58), Enum.Material.SmoothPlastic)
 death(lava)
 local void = part("VOID_KILL", Vector3.new(3000, 2, N * 60 + 1500),
     CFrame.new(0, -40, N * 28), Color3.fromRGB(42, 6, 45))
