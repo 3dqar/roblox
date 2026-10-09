@@ -31,8 +31,6 @@ world.Parent = workspace
 Lighting.ClockTime = 14.5
 Lighting.Brightness = 3
 Lighting.Ambient = Color3.fromRGB(155, 175, 210)
-workspace.FallenPartsDestroyHeight = -100
-
 local function block(name, size, position, color, material, parent)
     local p = Instance.new("Part")
     p.Name = name
