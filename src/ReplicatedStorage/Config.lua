@@ -1,5 +1,6 @@
 return {
     StageCount = 30,
+    StudioDataStores = false, -- Set true only for published test place with API enabled
     SkipStageProductId = 0, -- Creator Dashboard Developer Product
     VipPassId = 0, -- Creator Dashboard Game Pass
     DonationProductIds = {0, 0, 0}, -- 5, 15, 30 Robux donation Developer Products
