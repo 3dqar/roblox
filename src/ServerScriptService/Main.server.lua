@@ -12,7 +12,7 @@ remote.Name = "ObbyRemote"
 remote.Parent = Rep
 local store
 local okStore, result = pcall(function() return DSS:GetDataStore("TrollObby_V3") end)
-if okStore then store = result else warn("Datastore unavailable", result) end
+if okStore and (not Run:IsStudio() or Config.StudioDataStores) then store = result elseif not okStore then warn("Datastore unavailable", result) end
 local ready, memoryOnly, saving = {}, {}, {}
 local pads = {}
 local old = workspace:FindFirstChild("GeneratedObby")
@@ -103,7 +103,7 @@ local function tp(player, number)
     end
 end
 local function setStage(player, value)
-    if not ready[player] or player:GetAttribute("InLobby") then return end
+    if not ready[player] or player:GetAttribute("InLobby") ~= false then return end
     local stage = dataStage(player)
     value = math.clamp(value, 1, N + 1)
     if stage and value > stage.Value then
@@ -274,12 +274,13 @@ Players.PlayerAdded:Connect(function(player)
     stage.Name = "Stage"
     stage.Value = 1
     stage.Parent = stats
+    if player:GetAttribute("InLobby") == nil then player:SetAttribute("InLobby", true) end
     player.CharacterAdded:Connect(function(char)
         char:WaitForChild("HumanoidRootPart")
         while player.Parent and not ready[player] do task.wait(0.1) end
         if not player.Parent then return end
         task.wait(0.1)
-        if not player:GetAttribute("InLobby") then tp(player, stage.Value) end
+        if player:GetAttribute("InLobby") == false then tp(player, stage.Value) end
         vip(player)
     end)
     if store then
@@ -299,7 +300,7 @@ Players.PlayerAdded:Connect(function(player)
     end
     ready[player] = true
     if player.Character then task.defer(function()
-        if not player:GetAttribute("InLobby") then tp(player, stage.Value) end
+        if player:GetAttribute("InLobby") == false then tp(player, stage.Value) end
         vip(player)
     end) end
     task.spawn(checkVIP, player)
