@@ -38,6 +38,10 @@ Players.PlayerAdded:Connect(function(p)
 end)
 remote.OnServerEvent:Connect(function(p,kind)
     if kind~="Prestige" or prestige[p]==nil then return end
+    if p:GetAttribute("PrestigeRun") then
+        remote:FireClient(p,"Denied","Finish your current Prestige run first!")
+        return
+    end
     local stat=p:FindFirstChild("leaderstats")
     local stage=stat and stat:FindFirstChild("Stage")
     if not stage or stage.Value<cfg.StageCount+1 then
