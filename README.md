@@ -140,3 +140,23 @@ Seven cosmetic trails: Aurora (free), Fire (500 Coins), Ice (1,100 Coins), Rainb
 - Premium trails are **permanent Game Passes**, but their real IDs must be created in Roblox Creator Dashboard and pasted into `TrailPasses` in `Config.lua`. Configure matching 15/25/40 Robux prices in Dashboard. ID=0 means purchasing is disabled, not free.
 - Trail inventory, chosen style and unspent Coins persist in the v4 player DataStore in published servers (subject to API availability). Running particles are created only locally to reduce replication and do not change player speed.
 - Check that all Game Pass ownership checks succeed after purchasing, including rejoins. No real Robux purchases can be tested until passes are configured.
+
+## Quality and gameplay audit (October 2026)
+Latest fixes after cross-script review:
+- **Double Jump** now requires a verified permanent Game Pass configured in `Config.AbilityPasses.DoubleJump` (suggested price 19 Robux). It no longer consumes 80 Coins or expires after 3 minutes. Existing players must rejoin after configuring the pass if they already own it.
+- **Prestige and Speedrun respawns** now return to their current replay checkpoint rather than the main saved Stage. An active Prestige run cannot be started repeatedly to claim extra ranks.
+- **Color Floor** requires movement of at least 4 studs after the color announcement to grant its 8 Coins reward; standing AFK on a tile does not qualify.
+- **V4 profile loading** distinguishes safe temporary Studio testing from published DataStore failure. Wheel day, secret unlocks and trail inventory are included in profile saves and state notifications.
+- **Extras UI** gains subdued button borders and hover transitions.
+- The Rojo project mapping was reviewed: ServerScriptService, ReplicatedStorage and StarterPlayerScripts use folder mappings so newly added .server.lua/.client.lua files are included.
+
+### Publish checklist — actual Studio test still required
+1. Load the project with `git pull`, start Rojo, open Roblox Studio Output.
+2. Check first-join lobby, PLAY portal, 50 checkpoint jumps and every bounce pad. Test death/respawn midway through normal parkour, Speedrun and Prestige.
+3. Try the daily wheel twice; verify daily limit after rejoining a private **published** place with DataStore access.
+4. Test Treasure Hunt, Mystery Chest, Daily Challenge, Color Rush, Color Floor, and the owner-only ghost replay.
+5. Test paid Game Pass entitlements using IDs you created in Creator Dashboard; IDs set to 0 intentionally disable purchasing.
+6. Check UI overlap and touch buttons using Studio Device Emulator for phones and tablets, then test real device performance.
+7. Run a multi-client Studio server and inspect Output for runtime errors. Do not advertise this build as error-free before these manual tests.
+
+Note: Online GitHub review can verify source code and committed files, but **cannot execute Luau inside Roblox Studio**. Some gameplay balance or platform behavior may need adjustment after actual testing.
