@@ -69,7 +69,7 @@ for _,side in ipairs({-12,12}) do
 end
 local function surface(part,title,subtitle)
     local gui=Instance.new("SurfaceGui")
-    gui.Name="NeonBillboard";gui.Face=Enum.NormalId.Front;gui.CanvasSize=Vector2.new(900,600)
+    gui.Name="NeonBillboard";gui.Face=(part.Name=="FastestLeaderboard" or part.Name=="SupportLeaderboard") and Enum.NormalId.Back or Enum.NormalId.Front;gui.CanvasSize=Vector2.new(900,600)
     gui.LightInfluence=0;gui.AlwaysOnTop=false;gui.Parent=part
     local main=Instance.new("TextLabel")
     main.BackgroundTransparency=1;main.Size=UDim2.new(1,-40,0,120)
@@ -79,7 +79,7 @@ local function surface(part,title,subtitle)
     local body=Instance.new("TextLabel")
     body.Name="Entries";body.BackgroundTransparency=1
     body.Position=UDim2.fromOffset(30,145);body.Size=UDim2.new(1,-60,1,-165)
-    body.Font=Enum.Font.GothamBold;body.TextSize=32
+    body.Font=Enum.Font.GothamBold;body.TextSize=36
     body.TextWrapped=true;body.TextColor3=Color3.fromRGB(240,244,255)
     body.TextYAlignment=Enum.TextYAlignment.Top
     body.Text=subtitle;body.Parent=gui
@@ -144,7 +144,7 @@ if not Run:IsStudio() or cfg.StudioDataStores then
     pcall(function() donations=DSS:GetOrderedDataStore("TrollObbyV4_SupportTotals") end)
 end
 local function updateBoard(store,widget,ascending,unit)
-    if not store then widget.Text="Publish game to show global rankings";return end
+    if not store then widget.Text="GLOBAL TOP 5\nAvailable in the published game";return end
     local ok,pages=pcall(function() return store:GetSortedAsync(ascending,5) end)
     if not ok then widget.Text="Leaderboard temporarily unavailable";return end
     local lines={}
