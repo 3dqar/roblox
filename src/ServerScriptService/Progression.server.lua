@@ -210,10 +210,16 @@ bonus.Event:Connect(function(p, action, key)
     elseif action=="Wheel" then
         if d.wheelDay>=utcDay() then return end
         d.wheelDay=utcDay()
-        local payout=({25,50,75,100,150})[math.random(1,5)]
-        d.coins+=payout
-        if coins then coins.Value=d.coins end
-        remote:FireClient(p,"WheelWon",payout)
+        local roll=math.random(1,6)
+        if roll==6 and not d.effects.Spark then
+            d.effects.Spark=true
+            remote:FireClient(p,"WheelEffect","Spark")
+        else
+            local payout=({25,50,75,100,150})[math.random(1,5)]
+            d.coins+=payout
+            if coins then coins.Value=d.coins end
+            remote:FireClient(p,"WheelWon",payout)
+        end
     elseif action=="DoubleJump" then
         if d.coins<80 then
             remote:FireClient(p,"PurchaseDenied","Need 80 Coins!")
