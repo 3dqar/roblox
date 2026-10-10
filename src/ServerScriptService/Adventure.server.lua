@@ -2,9 +2,17 @@
 local Players=game:GetService("Players")
 local Rep=game:GetService("ReplicatedStorage")
 local reward=Rep:WaitForChild("ObbyBonusCoins")
+local request=Instance.new("RemoteEvent")
+request.Name="AdventureRequest"
+request.Parent=Rep
 local remote=Instance.new("RemoteEvent")
 remote.Name="AdventureEvent"
 remote.Parent=Rep
+request.OnServerEvent:Connect(function(p,kind)
+    if kind=="Wheel" or kind=="DoubleJump" then
+        reward:Fire(p,kind)
+    end
+end)
 local map=workspace:WaitForChild("GeneratedObby",20)
 local lobby=workspace:WaitForChild("WOW_LOBBY",20)
 if not map or not lobby then warn("Adventure: missing world") return end
