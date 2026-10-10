@@ -20,6 +20,9 @@ if not Run:IsStudio() or cfg.StudioDataStores then
     pcall(function() rankings = DSS:GetOrderedDataStore("TrollObbyV4_BestTime") end)
 end
 local state = {}
+local bonus = Instance.new("BindableEvent")
+bonus.Name = "ObbyBonusCoins"
+bonus.Parent = Rep
 local owned = {Rain=true, Spark=true, Aura=true, Crown=true, Bomz=true}
 local cost = {Rain=0, Spark=120}
 local function ownsPass(p, name)
@@ -136,7 +139,7 @@ local function leaderboard(p, best)
     pcall(function() rankings:SetAsync(tostring(p.UserId), math.floor(best * 100)) end)
 end
 Players.PlayerAdded:Connect(function(p)
-    local d={coins=0, lastDaily=-1, effects={Rain=true}, premium={}, equipped="Rain", bestTime=0, finished=0, start=os.clock(), loaded=false}
+    local d={coins=0, lastDaily=-1, effects={Rain=true}, premium={}, equipped="Rain", bestTime=0, finished=0, wheelDay=-1, secrets={}, start=os.clock(), loaded=false}
     state[p]=d
     local ok, value = false, nil
     if store then ok,value=pcall(function() return store:GetAsync(tostring(p.UserId)) end) end
@@ -148,6 +151,8 @@ Players.PlayerAdded:Connect(function(p)
         d.equipped=owned[value.equipped] and d.effects[value.equipped] and value.equipped or "Rain"
         d.bestTime=tonumber(value.bestTime) or 0
         d.finished=tonumber(value.finished) or 0
+        d.wheelDay=tonumber(value.wheelDay) or -1
+        d.secrets=type(value.secrets)=="table" and value.secrets or {}
     elseif not ok and not Run:IsStudio() then
         p:Kick("Your rewards could not load. Please rejoin.")
         state[p]=nil
@@ -191,12 +196,47 @@ Players.PlayerAdded:Connect(function(p)
     end)
     sync(p)
 end)
+bonus.Event:Connect(function(p, action, key)
+    local d=state[p]
+    if not d then return end
+    local coins=p:FindFirstChild("leaderstats")
+    coins=coins and coins:FindFirstChild("Coins")
+    if action=="Secret" and type(key)=="number" and key>=1 and key<=3 then
+        if d.secrets[tostring(key)] then return end
+        d.secrets[tostring(key)]=true
+        d.coins+=35
+        if coins then coins.Value=d.coins end
+        remote:FireClient(p,"SecretFound",key)
+    elseif action=="Wheel" then
+        if d.wheelDay>=utcDay() then return end
+        d.wheelDay=utcDay()
+        local payout=({25,50,75,100,150})[math.random(1,5)]
+        d.coins+=payout
+        if coins then coins.Value=d.coins end
+        remote:FireClient(p,"WheelWon",payout)
+    elseif action=="DoubleJump" then
+        if d.coins<80 then
+            remote:FireClient(p,"PurchaseDenied","Need 80 Coins!")
+            return
+        end
+        if (p:GetAttribute("DoubleJumpUntil") or 0)>os.time() then
+            remote:FireClient(p,"PurchaseDenied","Boost already active!")
+            return
+        end
+        d.coins-=80
+        if coins then coins.Value=d.coins end
+        p:SetAttribute("DoubleJumpUntil",os.time()+180)
+        remote:FireClient(p,"BoostUnlocked",180)
+    else return end
+    sync(p)
+    task.spawn(save,p)
+end)
 Players.PlayerRemoving:Connect(function(p) save(p); state[p]=nil end)
 query.OnServerInvoke=function(p,kind)
     local d=state[p]
     if not d then return nil end
     if kind=="state" then
-        return {coins=d.coins, lastDaily=d.lastDaily, effects=d.effects, equipped=d.equipped, premium=d.premium, bestTime=d.bestTime, finished=d.finished, day=utcDay()}
+        return {coins=d.coins, lastDaily=d.lastDaily, effects=d.effects, equipped=d.equipped, premium=d.premium, bestTime=d.bestTime, finished=d.finished, day=utcDay(),wheelDay=d.wheelDay,secrets=d.secrets}
     elseif kind=="leaders" then
         local result={}
         if rankings then
