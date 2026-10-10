@@ -23,7 +23,7 @@ local state = {}
 local bonus = Instance.new("BindableEvent")
 bonus.Name = "ObbyBonusCoins"
 bonus.Parent = Rep
-local owned = {Rain=true, Spark=true, Aura=true, Crown=true, Bomz=true}
+local owned = {Rain=true, Spark=true, Aura=true, Crown=true, Bomz=true, Frost=true}
 local cost = {Rain=0, Spark=120}
 local function ownsPass(p, name)
     local id = cfg.EffectPasses and cfg.EffectPasses[name]
@@ -89,6 +89,9 @@ local function attachEffect(p)
     elseif name=="Spark" then
         emitter.Color=ColorSequence.new(Color3.fromRGB(255,228,95))
         emitter.Acceleration=Vector3.new(0,2,0)
+    elseif name=="Frost" then
+        emitter.Color=ColorSequence.new(Color3.fromRGB(126,220,255))
+        emitter.Size=NumberSequence.new(.32)
     elseif name=="Aura" then
         emitter.Color=ColorSequence.new(Color3.fromRGB(174,90,255),Color3.fromRGB(76,255,240))
         emitter.Size=NumberSequence.new(.5)
@@ -220,6 +223,11 @@ bonus.Event:Connect(function(p, action, key)
             if coins then coins.Value=d.coins end
             remote:FireClient(p,"WheelWon",payout)
         end
+    elseif action=="UnlockFrost" then
+        d.effects.Frost=true
+    elseif action=="ActivityReward" and type(key)=="number" and key>=1 and key<=150 and key%1==0 then
+        d.coins+=key
+        if coins then coins.Value=d.coins end
     elseif action=="ColorRush" then
         d.coins+=20
         if coins then coins.Value=d.coins end
