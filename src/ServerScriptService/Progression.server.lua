@@ -277,7 +277,9 @@ remote.OnServerEvent:Connect(function(p,action,arg)
             d.effects[arg]=true
             p.leaderstats.Coins.Value=d.coins
         elseif not cost[arg] then
-            if not ownsPass(p,arg) then return end
+            if arg=="Frost" then
+                if not d.effects.Frost then return end
+            elseif not ownsPass(p,arg) then return end
             d.premium[arg]=true
             d.effects[arg]=true
         end
