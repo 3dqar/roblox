@@ -160,3 +160,20 @@ Latest fixes after cross-script review:
 7. Run a multi-client Studio server and inspect Output for runtime errors. Do not advertise this build as error-free before these manual tests.
 
 Note: Online GitHub review can verify source code and committed files, but **cannot execute Luau inside Roblox Studio**. Some gameplay balance or platform behavior may need adjustment after actual testing.
+
+## Quality update: admin diagnostics, unified Settings, UI and economy
+- `Diagnostics.server.lua` + `AdminDiagnostics.client.lua`: a read-only administrator-only on-demand check for lobby parts, expected signals, all 51 checkpoint parts, checkpoint spacing, generated intermediate blocks and configured DataStore access. In Roblox Studio admins automatically see the ADMIN AUDIT button; for a published server, add **your own numeric Roblox UserId** to `AdminUserIds` in `Config.lua`. The server checks authorization independently, and requests are rate-limited to 15 seconds. Never make diagnostics available to arbitrary players.
+- Main Settings panel now controls **Music / Particles / Trails / Ghost** via local player attributes. `BiomeMusic.client.lua`, `MovementFX.client.lua`, `DeathFX.client.lua` and `Arcade.client.lua` react to those attributes; ghost and particle rendering remain local-only. An old redundant music button is hidden. Preferences are per-session (not saved persistently).
+- Main UI gains restrained borders and hover transitions, consistent with previous Extras styling. Mobile panel and full visual layout still need device emulator verification.
+- A centralized `Economy` table controls core checkpoint (10), finish (250), Secret (35), Treasure (15), Color Floor (8), Color Rush (20), daily obby (100), chest (40) and wheel (25/50/75/100/150) coin rewards. Trail Coin prices remain Fire 500, Ice 1100, Rainbow 2500. This is a first-pass balancing configuration, not a measured player-economy simulation.
+
+### Studio QA checklist
+1. Stop Roblox Studio Play and old Rojo (`Control+C`), then run `cd ~/Downloads/troll-obby && git pull && ~/Downloads/rojo serve`. Reconnect the Rojo plugin and Play.
+2. Press **ADMIN AUDIT -> RUN SCAN**. Check warnings, especially missing remotes, portal, checkpoint blocks and DataStore config; see Studio Output for Lua runtime exceptions.
+3. Verify physical reachability: actually jump through stages 1, 10, 11, 20, 21, 30, 31, 40, 41 and 50, then test all special platform types. The diagnostic checks object presence and spacing, **not simulated character jumping or a pathfinding proof of reachability**.
+4. Open Settings. Switch Music OFF, Particles OFF, Trails OFF and Ghost OFF. Confirm that music stops and locally rendered trail, death particles and personal ghost disappear or cease emission, and that other players remain visible.
+5. Test on phone and tablet emulator; resize menus and check for overlapping speedrun, Trails, Color Rush and settings controls.
+6. Test published private-server DataStore persistence after restart and purchase entitlements with configured IDs; the diagnostics **do not test DataStore writes or guarantee that saved data is safe**.
+7. Use a two-player Studio test to ensure one player's personal-best ghost never appears on the other player's screen.
+
+**Status:** committed GitHub source has been inspected; full Roblox Studio runtime, interaction, performance and physical-playability testing has **not** been performed here.
