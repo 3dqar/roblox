@@ -94,6 +94,7 @@ promptSpeed.Triggered:Connect(function(p)
     if not stage then return end
     -- Speedrun requires a fresh character checkpoint, but does not overwrite saved stage.
     p:SetAttribute("SpeedrunStart",os.clock())
+    p:SetAttribute("SpeedrunNextStage",2)
     p:SetAttribute("InLobby",false)
     local first=map:FindFirstChild("Checkpoint_1")
     if first and p.Character then p.Character:PivotTo(first.CFrame+CFrame.new(0,6,0)) end
