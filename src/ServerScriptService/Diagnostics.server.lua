@@ -4,6 +4,8 @@ local Run=game:GetService("RunService")
 local Rep=game:GetService("ReplicatedStorage")
 local DSS=game:GetService("DataStoreService")
 local cfg=require(Rep:WaitForChild("Config"))
+local teleport=Instance.new("RemoteFunction")
+teleport.Name="AdminCheckpointTeleport";teleport.Parent=Rep
 local fn=Instance.new("RemoteFunction")
 fn.Name="AdminDiagnostics";fn.Parent=Rep
 local function authorized(p)
@@ -29,7 +31,7 @@ local function audit()
         log(Rep:FindFirstChild(name)~=nil,"Signal: "..name)
     end
     if lobby then
-        for _,name in ipairs({"START_PORTAL","MainPlaza","FastestLeaderboard","SupportLeaderboard","PhotoZone","MysteryChest"}) do
+        for _,name in ipairs({"MainPlaza","FastestLeaderboard","SupportLeaderboard","MysteryChest"}) do
             log(lobby:FindFirstChild(name)~=nil,"Lobby: "..name)
         end
     end
@@ -56,7 +58,7 @@ local function audit()
             end
             local steps=0
             for _,child in ipairs(world:GetChildren()) do
-                if child.Name:match("^Step_"..string.format("%02d",i).."_") then steps+=1 end
+                if child.Name:match("^Step_"..string.format("%02d",i).."_") or (child.Name=="BOUNCE_PAD" and math.abs(child.Position.Z-((i-1)*56+36))<1) then steps+=1 end
             end
             log(steps>=3,"Stage "..i.." generated jumping blocks: "..steps)
         end
@@ -72,6 +74,25 @@ local function audit()
     table.insert(lines,1,"TROLL OBBY DIAGNOSTICS • "..issues.." warnings")
     return table.concat(lines,"\n")
 end
+local lastTeleport={}
+teleport.OnServerInvoke=function(p,index)
+    if not authorized(p) then return false,"Not authorized" end
+    if type(index)~="number" or index%1~=0 or index<1 or index>cfg.StageCount+1 then return false,"Invalid checkpoint" end
+    if os.clock()-(lastTeleport[p] or -2)<1 then return false,"Teleport cooldown" end
+    local map=workspace:FindFirstChild("GeneratedObby")
+    local target=map and map:FindFirstChild("Checkpoint_"..index)
+    local char=p.Character
+    local root=char and char:FindFirstChild("HumanoidRootPart")
+    if not target or not target:IsA("BasePart") or not root then return false,"Checkpoint or character missing" end
+    lastTeleport[p]=os.clock()
+    p:SetAttribute("SpeedrunStart",nil)
+    p:SetAttribute("SpeedrunNextStage",nil)
+    p:SetAttribute("PrestigeRun",false)
+    p:SetAttribute("PrestigeStage",nil)
+    p:SetAttribute("InLobby",false)
+    char:PivotTo(target.CFrame*CFrame.new(0,6,0))
+    return true,"Teleported to checkpoint "..index.." (test mode; no saved progress granted)"
+end
 local lastRun={}
 fn.OnServerInvoke=function(p)
     if not authorized(p) then return "Diagnostics unavailable" end
@@ -79,5 +100,5 @@ fn.OnServerInvoke=function(p)
     lastRun[p]=os.clock()
     return audit()
 end
-Players.PlayerRemoving:Connect(function(p)lastRun[p]=nil end)
+Players.PlayerRemoving:Connect(function(p)lastRun[p]=nil;lastTeleport[p]=nil end)
 print("TROLL OBBY diagnostics ready (authorized admins only)")
