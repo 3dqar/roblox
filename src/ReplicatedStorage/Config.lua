@@ -1,5 +1,7 @@
 return {
     StageCount = 50,
+    AdminUserIds = {}, -- Add your Roblox numeric UserId; Studio also allows local diagnostics
+    Economy = {Checkpoint=10, Finish=250, Secret=35, Treasure=15, ColorFloor=8, ColorRush=20, DailyObby=100, ChestCoins=40, WheelCoins={25,50,75,100,150}},
     MusicAssetIds = {Lava=0, Ice=0, Candy=0, Space=0, Cyber=0}, -- paste permitted audio IDs; zero plays silence
     StudioDataStores = false, -- Set true only for published test place with API enabled
     SkipStageProductId = 0, -- Creator Dashboard Developer Product
