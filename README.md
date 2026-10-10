@@ -58,3 +58,28 @@ Search in Creator Store for **low-poly floating rocks**, **stylized fantasy tree
 - Cartoon clouds and ambience (check visibility/performance)
 - Short UI click, checkpoint and victory sound effects (licensed for Roblox use)
 Avoid untrusted scripts inside free models. Cosmetic models can be placed into Workspace; generated course geometry under GeneratedObby is rebuilt when Play begins. Test collisions and mobile performance.
+
+## Adventure feature update (checkpoint + double jump + speedrun + wheel + secrets + photos)
+New files:
+- `src/ServerScriptService/Adventure.server.lua`: 3 secret coin rooms (+35 Coins each, once per account when DataStore enabled), lobby photo zone and speedrun entrance, server-validated wheel/boost requests.
+- `src/StarterPlayer/StarterPlayerScripts/Adventure.client.lua`: checkpoint particle bursts + built-in chime, small wheel/boost buttons, jump control, speedrun timer and reward messages.
+- `Progression.server.lua` now owns rewards: daily wheel (once per UTC day: 25–150 Coins or a Spark cosmetic), 3-minute Double Jump for 80 Coins, secret rewards. Rewards are granted only by the server, not by the client.
+- `Main.server.lua` tracks the separate speedrun route's checkpoints (2 through finish) without modifying unlocked stage progression and records completed times.
+
+### Things to test in Roblox Studio
+1. Step on checkpoint 2: green/gold burst and short sound; receive +10 Coins (as before).
+2. Earn 80 Coins, press DOUBLE JUMP, jump then jump again while airborne. Boost expires after 3 minutes.
+3. Go to lobby SPEEDRUN gate; travel through every stage and finish to record a separate speedrun time. Intentionally skipping a checkpoint must not count.
+4. Press DAILY WHEEL twice: only the first attempt each UTC day awards a prize.
+5. Find secret rooms near stages 4, 14, 24; +35 Coins once for each.
+6. Use the photo area in lobby; it displays the zone and lets you use Roblox screenshot controls.
+
+**Limitations:** No mechanical sound asset purchase is required, but the built-in checkpoint chime availability still needs Studio verification. The wheel currently reveals prizes immediately; a graphical spinning-wheel animation is a possible future enhancement. Secret room jump gaps and double-jump accessibility must be manually playtested. This GitHub update was not executed in Roblox Studio.
+
+### Update on Mac
+```bash
+cd ~/Downloads/troll-obby
+git pull
+~/Downloads/rojo serve
+```
+Stop your previous Rojo server first (Control+C). Avoid copying files manually.
