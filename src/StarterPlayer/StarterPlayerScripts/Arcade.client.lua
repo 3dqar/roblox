@@ -30,9 +30,11 @@ local function toast(v)
     msg.Text=tostring(v);msg.Visible=true
     task.delay(3.5,function()if n==generation then msg.Visible=false end end)
 end
-local function startGhost(points)
+local function startGhost(data)
     clearGhost()
+    local points = type(data)=="table" and data.samples
     if type(points)~="table" or #points<2 then return end
+    local sampleInterval=math.clamp(tonumber(data.interval) or .5,.1,2)
     ghost=Instance.new("Part")
     ghost.Name="PersonalBestGhost"
     ghost.Size=Vector3.new(2.5,5,2)
@@ -41,6 +43,7 @@ local function startGhost(points)
     ghost.Transparency=.58
     ghost.Anchored=true
     ghost.CanCollide=false;ghost.CanTouch=false;ghost.CanQuery=false
+    -- Created in this LocalScript only: other players do not see this ghost.
     ghost.Parent=workspace
     local nameTag=Instance.new("BillboardGui")
     nameTag.Size=UDim2.fromOffset(190,40)
@@ -50,11 +53,12 @@ local function startGhost(points)
     local title=Instance.new("TextLabel")
     title.Size=UDim2.fromScale(1,1);title.BackgroundTransparency=1
     title.Font=Enum.Font.GothamBold;title.TextScaled=true
-    title.TextColor3=Color3.fromRGB(190,242,255);title.Text="YOUR BEST GHOST"
+    title.TextColor3=Color3.fromRGB(190,242,255)
+    title.Text="YOUR BEST: "..string.format("%.1fs",tonumber(data.bestTime) or 0)
     title.Parent=nameTag
     local started=os.clock()
     moving=Run.RenderStepped:Connect(function()
-        local elapsed=(os.clock()-started)/.5
+        local elapsed=(os.clock()-started)/sampleInterval
         local index=math.floor(elapsed)+1
         if index>=#points then clearGhost();return end
         local a,b=points[index],points[index+1]
@@ -73,3 +77,6 @@ event.OnClientEvent:Connect(function(kind,payload)
     end
 end)
 player.CharacterAdded:Connect(clearGhost)
+player:GetAttributeChangedSignal("InLobby"):Connect(function()
+    if player:GetAttribute("InLobby") then clearGhost() end
+end)
