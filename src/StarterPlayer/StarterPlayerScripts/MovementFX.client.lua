@@ -56,7 +56,7 @@ local function corner(obj)
     local c=Instance.new("UICorner");c.CornerRadius=UDim.new(0,11);c.Parent=obj
 end
 local launch=Instance.new("TextButton")
-launch.Size=UDim2.fromOffset(115,35);launch.Position=UDim2.new(1,-130,1,-170)
+launch.Size=UDim2.fromOffset(115,35);launch.Position=UDim2.new(0,12,1,-165)
 launch.Text="✨ TRAILS";launch.Font=Enum.Font.GothamBold;launch.TextSize=13
 launch.TextColor3=Color3.new(1,1,1);launch.BackgroundColor3=Color3.fromRGB(82,59,173)
 launch.Parent=gui;corner(launch)
