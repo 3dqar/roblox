@@ -95,23 +95,17 @@ local function popup(name,heading)
     button(f,"✕",UDim2.new(1,-51,0,18),UDim2.fromOffset(35,34),palette.panel,function() f.Visible=false end)
     return f
 end
-local daily=popup("Daily","🎁 DAILY REWARD")
 local pets=popup("Effects","✨ CHARACTER EFFECTS")
 local leaders=popup("Leaders","🏆 FASTEST PLAYERS")
 local stats=popup("Statistics","📊 YOUR STATS")
-local modalNames={{"🎁",daily},{"✨",pets},{"🏆",leaders},{"📊",stats}}
+local modalNames={{"✨",pets},{"🏆",leaders},{"📊",stats}}
 for i,v in ipairs(modalNames) do
-    button(dock,v[1],UDim2.new((i-1)/4,4,0,5),UDim2.new(.25,-8,0,31),palette.panel,function()
+    button(dock,v[1],UDim2.new((i-1)/3,4,0,5),UDim2.new(1/3,-8,0,31),palette.panel,function()
         local current=v[2].Visible
         closeViews()
         v[2].Visible=not current
     end)
 end
-label(daily,"Collect 75 free coins once per UTC day!",UDim2.fromOffset(20,75),UDim2.new(1,-40,0,70),18,false)
-local dailyStatus=label(daily,"Loading...",UDim2.fromOffset(20,170),UDim2.new(1,-40,0,50),19,true)
-local dailyBtn=button(daily,"CLAIM +75 🪙",UDim2.new(.12,0,0,260),UDim2.new(.76,0,0,55),palette.mint,function()
-    event:FireServer("Daily")
-end)
 local state
 local effectNames={"Rain","Spark","Aura","Crown","Bomz"}
 local effectButtons={}
@@ -156,11 +150,6 @@ local statsText=label(stats,"Loading...",UDim2.fromOffset(18,80),UDim2.new(1,-36
 local function update(d)
     state=d
     if not d then return end
-    local today=math.floor(os.time()/86400)
-    local available=(d.lastDaily or -1)<today
-    dailyStatus.Text=available and "✅ Ready to claim" or "✔ Already claimed today"
-    dailyBtn.Text=available and "CLAIM +75 🪙" or "COME BACK TOMORROW"
-    dailyBtn.BackgroundColor3=available and palette.mint or palette.panel
     for _,name in ipairs(effectNames) do
         if d.equipped==name then effectButtons[name].Text="EQUIPPED"
         elseif d.effects and d.effects[name] then effectButtons[name].Text="EQUIP"
@@ -196,6 +185,6 @@ end
 event.OnClientEvent:Connect(function(kind,value)
     if kind=="State" then update(value)
     elseif kind=="CoinsEarned" then toast("🪙 +"..tostring(value).." Coins!")
-    elseif kind=="DailyClaimed" then toast("🎁 Daily reward: +"..tostring(value).." Coins!")
+
     elseif kind=="Victory" then victory(value) end
 end)
