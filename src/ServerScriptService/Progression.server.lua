@@ -36,7 +36,7 @@ local function sync(p)
     local d = state[p]
     if d then remote:FireClient(p, "State", {
         coins=d.coins, lastDaily=d.lastDaily, effects=d.effects, equipped=d.equipped, premium=d.premium,
-        bestTime=d.bestTime, finished=d.finished
+        bestTime=d.bestTime, finished=d.finished, trails=d.trails, equippedTrail=d.equippedTrail
     }) end
 end
 local function attachEffect(p)
@@ -133,7 +133,7 @@ end
 local function save(p)
     local d=state[p]
     if not d or not d.loaded or not store then return end
-    local snapshot = {coins=d.coins, lastDaily=d.lastDaily, effects=d.effects, equipped=d.equipped, bestTime=d.bestTime, finished=d.finished, trails=d.trails, equippedTrail=d.equippedTrail}
+    local snapshot = {coins=d.coins, lastDaily=d.lastDaily, effects=d.effects, equipped=d.equipped, bestTime=d.bestTime, finished=d.finished, trails=d.trails, equippedTrail=d.equippedTrail, wheelDay=d.wheelDay, secrets=d.secrets}
     local success, err = pcall(function() store:SetAsync(tostring(p.UserId), snapshot) end)
     if not success then warn("V4 save failed", err) end
 end
@@ -264,7 +264,7 @@ query.OnServerInvoke=function(p,kind)
     local d=state[p]
     if not d then return nil end
     if kind=="state" then
-        return {coins=d.coins, lastDaily=d.lastDaily, effects=d.effects, equipped=d.equipped, premium=d.premium, bestTime=d.bestTime, finished=d.finished, day=utcDay(),wheelDay=d.wheelDay,secrets=d.secrets}
+        return {coins=d.coins, lastDaily=d.lastDaily, effects=d.effects, equipped=d.equipped, premium=d.premium, bestTime=d.bestTime, finished=d.finished, day=utcDay(),wheelDay=d.wheelDay,secrets=d.secrets,trails=d.trails,equippedTrail=d.equippedTrail}
     elseif kind=="leaders" then
         local result={}
         if rankings then
