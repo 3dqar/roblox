@@ -194,3 +194,18 @@ Note: Online GitHub review can verify source code and committed files, but **can
 7. Test speedrun/prestige cancellation after a teleport, and rejoining afterward. Check Studio Output for runtime errors.
 
 **Verification limit:** GitHub source changes were reviewed and saved to main, but this session cannot execute Roblox Studio. Confirm on-device behavior and performance before release.
+
+## Troll Traps, World Progress Map and Finish Celebration
+- `TrollTraps.server.lua` places decorative side-route fake checkpoints at stages 5/15/25/35/45, fake exit doors at 8/18/28/38/48, and surprise touch tiles at 3/13/23/33/43. These are optional jokes, not required jumps, and **never award stage progress or take Coins**.
+- `TrollTraps.client.lua` renders a local-only animated joke message on contact. Server message traffic is debounced per player and object.
+- `WorldMap.client.lua` adds a WORLDS button showing progress through Lava, Ice, Candy, Space and Cyber, 10 stages each, based on `leaderstats.Stage`. It does not modify checkpoints.
+- Existing `Extras.client.lua` victory now has a unified five-world finish panel, earned Coin summary and 38 bounded confetti pieces. Confetti respects the local Particles OFF setting.
+- Admin diagnostics now checks the optional TrollTraps folder and TrollTrapFX signal.
+
+### Verification and caveats
+Source changes are committed to GitHub main. Roblox Studio was not available in this session; there is **no runtime or physical jump test**. In Studio Play check Output for exceptions, step onto trap side-routes and confirm no Stage/Coins gains, finish the course and verify the victory popup, and test WORLDS on phone. Confirm no troll parts obstruct the required stepping stones. In a multi-client session confirm only the triggering player sees their prank message.
+
+### Next suggestions
+- Add a troll difficulty toggle or a short no-troll onboarding zone for first-time players.
+- Track trap discoveries as a non-currency collection badge to encourage exploration without adding inflation.
+- Check accessibility: avoid strong flashing or forced camera shaking by default.
