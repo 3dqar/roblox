@@ -26,8 +26,6 @@ local function pill(name,title,y,color)
 end
 local wheel=pill("Wheel","🎡 DAILY WHEEL",-116,Color3.fromRGB(121,70,228))
 local jump=pill("Jump","⚡ DOUBLE JUMP",-59,Color3.fromRGB(33,170,130))
-local timer=pill("Timer","⏱ 00:00",-2,Color3.fromRGB(29,33,75))
-timer.Active=false;timer.AutoButtonColor=false;timer.Visible=false
 local status=Instance.new("TextLabel")
 status.AnchorPoint=Vector2.new(.5,0)
 status.Position=UDim2.fromScale(.5,.35)
@@ -54,23 +52,6 @@ jump.Activated:Connect(function()
     local id=cfg.AbilityPasses and cfg.AbilityPasses.DoubleJump or 0
     if id==0 then show("Double Jump pass is not configured yet.") return end
     Market:PromptGamePassPurchase(player,id)
-end)
-local speedrunStart=nil
-Run.RenderStepped:Connect(function()
-    if speedrunStart then
-        local elapsed=math.floor(os.clock()-speedrunStart)
-        timer.Text=string.format("⏱ %02d:%02d",math.floor(elapsed/60),elapsed%60)
-    end
-end)
-event.OnClientEvent:Connect(function(kind,center)
-    if kind=="SpeedrunStart" then
-        speedrunStart=os.clock();timer.Visible=true;show("SPEEDRUN START! Race to the finish!")
-    elseif kind=="SpeedrunFinish" then
-        show(string.format("🏆 SPEEDRUN FINISHED: %.2f seconds!",tonumber(center) or 0))
-        speedrunStart=nil;timer.Visible=false
-    elseif kind=="Photo" then
-        show("📸 PHOTO ZONE! Use your Roblox screenshot controls.")
-    end
 end)
 v4.OnClientEvent:Connect(function(kind,value)
     if kind=="WheelWon" then show("🎡 YOU WON +"..tostring(value).." COINS!")
