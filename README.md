@@ -89,3 +89,12 @@ Stop your previous Rojo server first (Control+C). Avoid copying files manually.
 - Added COLOR RUSH, a free color-memory challenge: watch a sequence of four Red/Black/Green tiles, repeat it, earn 20 Coins on success. 90-second cooldown between completed rounds; no Coins/Robux stakes or losses. This is **not** a roulette or casino and does not grant 2x/5x bet payouts, which are prohibited by Roblox simulated-gambling rules.
 - Server validates game sequence, timing and rewards. UI is in `ColorRush.client.lua`, server handler in `ColorRush.server.lua`.
 - Not yet tested in Roblox Studio; run Play and inspect Output before publishing.
+
+## Five Arcade Activities Update
+- Hourly Treasure Hunt: five treasure islands every UTC hour, +15 Coins per chest per player/hour. Bridges let players reach them.
+- Color Floor: a 5-second RED / BLUE / GREEN challenge every 24 seconds, +8 Coins for standing on the correct tile.
+- Daily Obby Challenge: green lobby portal, six platforms and a +100 Coins daily reward; exit prompt to return.
+- Mystery Chest: free once per UTC day, gives 40 Coins or exclusive Frost cosmetic (no bets).
+- Race Against Ghost: sample and play back your previous best speedrun path using a non-collidable translucent ghost (up to 500 half-second samples).
+
+Studio testing and verification still required. All 5 features are source-level implemented but Roblox Studio was not available for playtest. Daily rewards and ghost persistence require a published place and working DataStores; StudioDataStores=false keeps test progress session-only. Test portals, coin payouts, replay and mobile layouts privately before public launch.
