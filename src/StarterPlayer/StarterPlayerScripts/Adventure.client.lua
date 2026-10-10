@@ -62,11 +62,11 @@ v4.OnClientEvent:Connect(function(kind,value)
     end
 end)
 local checkpointSound=Instance.new("Sound")
-checkpointSound.SoundId="rbxasset://sounds/action_get.wav"
+checkpointSound.SoundId="" -- optional checkpoint sound disabled: bundled path fails on some clients
 checkpointSound.Volume=.35
 checkpointSound.Parent=gui
 local function burst()
-    checkpointSound:Play()
+    if checkpointSound.SoundId~="" then checkpointSound:Play() end
     local char=player.Character
     local root=char and char:FindFirstChild("HumanoidRootPart")
     if not root then return end
