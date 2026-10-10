@@ -5,7 +5,6 @@ local Input=game:GetService("UserInputService")
 local Run=game:GetService("RunService")
 local player=Players.LocalPlayer
 local obby=Rep:WaitForChild("ObbyRemote")
-local reward=Rep:WaitForChild("ObbyBonusCoins")
 local v4=Rep:WaitForChild("V4Event")
 local event=Rep:WaitForChild("AdventureEvent")
 local gui=Instance.new("ScreenGui")
@@ -53,6 +52,9 @@ end)
 event.OnClientEvent:Connect(function(kind,center)
     if kind=="SpeedrunStart" then
         speedrunStart=os.clock();timer.Visible=true;show("SPEEDRUN START! Race to the finish!")
+    elseif kind=="SpeedrunFinish" then
+        show(string.format("🏆 SPEEDRUN FINISHED: %.2f seconds!",tonumber(center) or 0))
+        speedrunStart=nil;timer.Visible=false
     elseif kind=="Photo" then
         show("📸 PHOTO ZONE! Use your Roblox screenshot controls.")
     end
@@ -62,12 +64,14 @@ v4.OnClientEvent:Connect(function(kind,value)
     elseif kind=="SecretFound" then show("🔑 SECRET FOUND! +35 COINS")
     elseif kind=="BoostUnlocked" then show("⚡ Double Jump available for 3 minutes!")
     elseif kind=="PurchaseDenied" then show(tostring(value))
-    elseif kind=="Victory" and speedrunStart then
-        show("🏆 SPEEDRUN COMPLETE!")
-        speedrunStart=nil;timer.Visible=false
     end
 end)
+local checkpointSound=Instance.new("Sound")
+checkpointSound.SoundId="rbxasset://sounds/action_get.wav"
+checkpointSound.Volume=.35
+checkpointSound.Parent=gui
 local function burst()
+    checkpointSound:Play()
     local char=player.Character
     local root=char and char:FindFirstChild("HumanoidRootPart")
     if not root then return end
@@ -84,7 +88,7 @@ local function burst()
 end
 obby.OnClientEvent:Connect(function(kind,stage)
     if kind=="checkpoint" then
-        burst();show("✅ CHECKPOINT "..tostring(stage).." • +10 COINS")
+        burst();show("✅ CHECKPOINT "..tostring(stage).." UNLOCKED!")
     end
 end)
 local extraUsed=false
