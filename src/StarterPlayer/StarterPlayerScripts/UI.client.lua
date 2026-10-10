@@ -121,7 +121,7 @@ navMax.Parent = nav
 local shop = modal("Shop", "🛒 POWER-UP SHOP", 410)
 local missions = modal("Missions", "🎯 MISSIONS", 375)
 local help = modal("HowToPlay", "👋 WELCOME, PLAYER!", 370)
-local settings = modal("Settings", "⚙️ SETTINGS", 430)
+local settings = modal("Settings", "⚙️ SETTINGS", 455)
 local donate = modal("Support", "💜 SUPPORT THE GAME", 360)
 local names = {
     {"SHOP", shop}, {"QUESTS", missions}, {"SUPPORT", donate}, {"HELP", help}, {"⚙", settings}
@@ -199,6 +199,7 @@ local preferences={
     {"Particles","ParticlesEnabled",true},
     {"Trails","TrailsEnabled",true},
     {"Ghost","GhostEnabled",true},
+    {"Low graphics","LowGraphicsEnabled",false},
 }
 for index,item in ipairs(preferences) do
     local name,attribute,default=item[1],item[2],item[3]
@@ -207,16 +208,16 @@ for index,item in ipairs(preferences) do
     local function update()
         b.Text=name:upper()..": "..(player:GetAttribute(attribute)==false and "OFF" or "ON")
     end
-    b=button(settings,"Pref_"..attribute,"",UDim2.new(.09,0,0,65+(index-1)*59),
-        UDim2.new(.82,0,0,48),index%2==0 and COLOR.panel or COLOR.purple,function()
+    b=button(settings,"Pref_"..attribute,"",UDim2.new(.09,0,0,65+(index-1)*57),
+        UDim2.new(.82,0,0,45),index%2==0 and COLOR.panel or COLOR.purple,function()
             player:SetAttribute(attribute,player:GetAttribute(attribute)==false)
         end)
     player:GetAttributeChangedSignal(attribute):Connect(update)
     update()
 end
 label(settings,"SettingsTip","Personal display preferences • only affects your screen.",
-    UDim2.new(.08,0,0,315),UDim2.new(.84,0,0,35),13,false)
-button(settings,"Help","SHOW TUTORIAL",UDim2.new(.17,0,0,363),UDim2.new(.66,0,0,40),COLOR.panel,
+    UDim2.new(.08,0,0,359),UDim2.new(.84,0,0,35),13,false)
+button(settings,"Help","SHOW TUTORIAL",UDim2.new(.17,0,0,405),UDim2.new(.66,0,0,40),COLOR.panel,
     function() hideAll();help.Visible=true end)
 local stats = player:WaitForChild("leaderstats")
 local stage = stats:WaitForChild("Stage")
