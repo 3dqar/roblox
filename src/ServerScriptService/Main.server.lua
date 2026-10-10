@@ -365,7 +365,11 @@ Players.PlayerAdded:Connect(function(player)
         while player.Parent and not ready[player] do task.wait(0.1) end
         if not player.Parent then return end
         task.wait(0.1)
-        if player:GetAttribute("InLobby") == false then tp(player, stage.Value) end
+        if player:GetAttribute("InLobby") == false then
+            local replay=player:GetAttribute("PrestigeRun") and player:GetAttribute("PrestigeStage")
+            local race=player:GetAttribute("SpeedrunNextStage")
+            tp(player, tonumber(replay) or (type(race)=="number" and math.max(1,race-1)) or stage.Value)
+        end
         vip(player)
     end)
     if store then
