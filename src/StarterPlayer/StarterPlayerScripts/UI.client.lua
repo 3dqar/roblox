@@ -41,6 +41,8 @@ local function newFrame(parent, name, pos, size, bg)
     f.BorderSizePixel = 0
     f.Parent = parent
     corner(f, 17)
+    local edge=Instance.new("UIStroke")
+    edge.Color=Color3.fromRGB(110,112,180);edge.Transparency=.65;edge.Thickness=1;edge.Parent=f
     return f
 end
 local function label(parent, name, str, pos, size, textSize, bold, alignment)
@@ -65,6 +67,14 @@ local function button(parent, name, title, pos, size, color, click)
     b.BorderSizePixel = 0
     b.Parent = parent
     corner(b, 12)
+    local edge=Instance.new("UIStroke")
+    edge.Color=COLOR.white;edge.Transparency=.86;edge.Parent=b
+    b.MouseEnter:Connect(function()
+        Tween:Create(edge,TweenInfo.new(.12),{Transparency=.36}):Play()
+    end)
+    b.MouseLeave:Connect(function()
+        Tween:Create(edge,TweenInfo.new(.12),{Transparency=.86}):Play()
+    end)
     b.Activated:Connect(click)
     return b
 end
@@ -111,7 +121,7 @@ navMax.Parent = nav
 local shop = modal("Shop", "🛒 POWER-UP SHOP", 410)
 local missions = modal("Missions", "🎯 MISSIONS", 375)
 local help = modal("HowToPlay", "👋 WELCOME, PLAYER!", 370)
-local settings = modal("Settings", "⚙️ SETTINGS", 300)
+local settings = modal("Settings", "⚙️ SETTINGS", 430)
 local donate = modal("Support", "💜 SUPPORT THE GAME", 360)
 local names = {
     {"SHOP", shop}, {"QUESTS", missions}, {"SUPPORT", donate}, {"HELP", help}, {"⚙", settings}
@@ -184,14 +194,30 @@ end
 label(settings, "SettingsInfo", "Interface options (saved for this session).", UDim2.fromOffset(22, 65),
     UDim2.new(1, -44, 0, 47), 15, false)
 local compact = false
-button(settings, "Compact", "COMPACT HUD: OFF", UDim2.new(0.1, 0, 0, 130), UDim2.new(0.8, 0, 0, 50), COLOR.purple,
-    function()
-        compact = not compact
-        top.Visible = not compact
-        settings.Compact.Text = compact and "COMPACT HUD: ON" or "COMPACT HUD: OFF"
-    end)
-button(settings, "Help", "SHOW TUTORIAL AGAIN", UDim2.new(0.1, 0, 0, 193), UDim2.new(0.8, 0, 0, 47), COLOR.panel,
-    function() hideAll(); help.Visible = true end)
+local preferences={
+    {"Music","MusicEnabled",true},
+    {"Particles","ParticlesEnabled",true},
+    {"Trails","TrailsEnabled",true},
+    {"Ghost","GhostEnabled",true},
+}
+for index,item in ipairs(preferences) do
+    local name,attribute,default=item[1],item[2],item[3]
+    if player:GetAttribute(attribute)==nil then player:SetAttribute(attribute,default) end
+    local b
+    local function update()
+        b.Text=name:upper()..": "..(player:GetAttribute(attribute)==false and "OFF" or "ON")
+    end
+    b=button(settings,"Pref_"..attribute,"",UDim2.new(.09,0,0,65+(index-1)*59),
+        UDim2.new(.82,0,0,48),index%2==0 and COLOR.panel or COLOR.purple,function()
+            player:SetAttribute(attribute,player:GetAttribute(attribute)==false)
+        end)
+    player:GetAttributeChangedSignal(attribute):Connect(update)
+    update()
+end
+label(settings,"SettingsTip","Personal display preferences • only affects your screen.",
+    UDim2.new(.08,0,0,315),UDim2.new(.84,0,0,35),13,false)
+button(settings,"Help","SHOW TUTORIAL",UDim2.new(.17,0,0,363),UDim2.new(.66,0,0,40),COLOR.panel,
+    function() hideAll();help.Visible=true end)
 local stats = player:WaitForChild("leaderstats")
 local stage = stats:WaitForChild("Stage")
 local function refresh()
