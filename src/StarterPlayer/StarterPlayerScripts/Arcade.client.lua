@@ -32,6 +32,7 @@ local function toast(v)
 end
 local function startGhost(data)
     clearGhost()
+    if player:GetAttribute("GhostEnabled")==false then return end
     local points = type(data)=="table" and data.samples
     if type(points)~="table" or #points<2 then return end
     local sampleInterval=math.clamp(tonumber(data.interval) or .5,.1,2)
@@ -75,6 +76,9 @@ event.OnClientEvent:Connect(function(kind,payload)
     elseif kind=="Treasure" or kind=="ColorFloor" or kind=="DailyChallenge" or kind=="Chest" then
         toast(payload)
     end
+end)
+player:GetAttributeChangedSignal("GhostEnabled"):Connect(function()
+    if player:GetAttribute("GhostEnabled")==false then clearGhost() end
 end)
 player.CharacterAdded:Connect(clearGhost)
 player:GetAttributeChangedSignal("InLobby"):Connect(function()
