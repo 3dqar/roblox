@@ -10,6 +10,8 @@ if existing then existing:Destroy() end
 local Rep=game:GetService("ReplicatedStorage")
 local portalRequest=Instance.new("RemoteEvent")
 portalRequest.Name="LobbyEnterRequest";portalRequest.Parent=Rep
+local returnRequest=Instance.new("RemoteEvent")
+returnRequest.Name="ReturnToLobby";returnRequest.Parent=Rep
 local root=Instance.new("Folder")
 root.Name="WOW_LOBBY"
 root.Parent=workspace
@@ -77,7 +79,7 @@ local function surface(part,title,subtitle)
     local body=Instance.new("TextLabel")
     body.Name="Entries";body.BackgroundTransparency=1
     body.Position=UDim2.fromOffset(30,145);body.Size=UDim2.new(1,-60,1,-165)
-    body.Font=Enum.Font.GothamBold;body.TextSize=42
+    body.Font=Enum.Font.GothamBold;body.TextSize=32
     body.TextWrapped=true;body.TextColor3=Color3.fromRGB(240,244,255)
     body.TextYAlignment=Enum.TextYAlignment.Top
     body.Text=subtitle;body.Parent=gui
@@ -85,7 +87,7 @@ local function surface(part,title,subtitle)
 end
 local board1=item("FastestLeaderboard",Vector3.new(31,22,2),Vector3.new(-32,17,-27),midnight)
 local board2=item("SupportLeaderboard",Vector3.new(31,22,2),Vector3.new(32,17,-27),midnight)
-local fastest=surface(board1,"🏆 TOP RUNNERS","Loading leaderboard...")
+local fastest=surface(board1,"🏆 FASTEST RUNS","Loading leaderboard...")
 local supporters=surface(board2,"💜 TOP SUPPORTERS","Loading supporters...")
 local banner=item("WelcomeNeon",Vector3.new(38,10,2),Vector3.new(0,24,-42),midnight)
 surface(banner,"🌋 TROLL OBBY","WELCOME TO THE CHALLENGE!")
@@ -123,6 +125,15 @@ portal.Touched:Connect(function(hit)
     local p=char and Players:GetPlayerFromCharacter(char)
     enterObby(p)
 end)
+returnRequest.OnServerEvent:Connect(function(p)
+    if p:GetAttribute("InLobby")~=false then return end
+    p:SetAttribute("SpeedrunStart",nil)
+    p:SetAttribute("SpeedrunNextStage",nil)
+    p:SetAttribute("PrestigeRun",false)
+    p:SetAttribute("PrestigeStage",nil)
+    p:SetAttribute("InLobby",true)
+    sendToLobby(p)
+end)
 portalRequest.OnServerEvent:Connect(function(p)
     -- The client may enter only from the lobby state.
     enterObby(p)
@@ -133,9 +144,9 @@ if not Run:IsStudio() or cfg.StudioDataStores then
     pcall(function() donations=DSS:GetOrderedDataStore("TrollObbyV4_SupportTotals") end)
 end
 local function updateBoard(store,widget,ascending,unit)
-    if not store then widget.Text="Leaderboard available after publishing";return end
+    if not store then widget.Text="Publish game to show global rankings";return end
     local ok,pages=pcall(function() return store:GetSortedAsync(ascending,5) end)
-    if not ok then widget.Text="Connect DataStore to show rankings";return end
+    if not ok then widget.Text="Leaderboard temporarily unavailable";return end
     local lines={}
     for i,v in ipairs(pages:GetCurrentPage()) do
         local name="Player "..v.key
