@@ -203,11 +203,11 @@ Players.PlayerAdded:Connect(function(p)
     stage.Changed:Connect(function(v)
         if not state[p] then return end
         if v>1 and v<=cfg.StageCount then
-            d.coins+=10
+            d.coins+=cfg.Economy.Checkpoint
             coins.Value=d.coins
-            remote:FireClient(p,"CoinsEarned",10)
+            remote:FireClient(p,"CoinsEarned",cfg.Economy.Checkpoint)
         elseif v==cfg.StageCount+1 then
-            d.coins+=250
+            d.coins+=cfg.Economy.Finish
             d.finished+=1
             coins.Value=d.coins
             local elapsed=math.floor(os.clock()-d.start)
@@ -229,7 +229,7 @@ bonus.Event:Connect(function(p, action, key)
     if action=="Secret" and type(key)=="number" and key>=1 and key<=3 then
         if d.secrets[tostring(key)] then return end
         d.secrets[tostring(key)]=true
-        d.coins+=35
+        d.coins+=cfg.Economy.Secret
         if coins then coins.Value=d.coins end
         remote:FireClient(p,"SecretFound",key)
     elseif action=="Wheel" then
@@ -240,7 +240,8 @@ bonus.Event:Connect(function(p, action, key)
             d.effects.Spark=true
             remote:FireClient(p,"WheelEffect","Spark")
         else
-            local payout=({25,50,75,100,150})[math.random(1,5)]
+            local amounts=cfg.Economy.WheelCoins
+            local payout=amounts[math.random(1,#amounts)]
             d.coins+=payout
             if coins then coins.Value=d.coins end
             remote:FireClient(p,"WheelWon",payout)
@@ -251,7 +252,7 @@ bonus.Event:Connect(function(p, action, key)
         d.coins+=key
         if coins then coins.Value=d.coins end
     elseif action=="ColorRush" then
-        d.coins+=20
+        d.coins+=cfg.Economy.ColorRush
         if coins then coins.Value=d.coins end
     elseif action=="DoubleJump" then
         -- Permanent ability: never deduct earned Coins for this Game Pass.
