@@ -48,3 +48,13 @@ Game Pass / Donation Product IDs remain set to 0 by default. No actual Robux pay
 
 ## Optional free Creator Store assets
 Search in Creator Store for **low-poly floating rocks**, **stylized fantasy trees**, **neon sci-fi portal**, **cartoon clouds**, **obby sound effects**, and **ambient synth music**. Prefer assets without Scripts or LocalScripts and verify creator/license permissions. Put *decorative* models in Workspace outside `GeneratedObby` (which is regenerated at runtime); don't use unreviewed free models with executable scripts. Only use royalty-free audio allowed for Roblox experiences.
+
+## Suggested Creator Store searches (optional)
+- Stylized low poly rocks / floating islands
+- Fantasy trees (no scripts)
+- Crystal clusters (no scripts)
+- Animated waterfall (inspect included scripts)
+- Sci-fi portal frame (decorative only; do not replace programmed teleport trigger)
+- Cartoon clouds and ambience (check visibility/performance)
+- Short UI click, checkpoint and victory sound effects (licensed for Roblox use)
+Avoid untrusted scripts inside free models. Cosmetic models can be placed into Workspace; generated course geometry under GeneratedObby is rebuilt when Play begins. Test collisions and mobile performance.
