@@ -1,4 +1,4 @@
--- Arcade notifications and non-colliding personal best ghost replay.
+-- Treasure Hunt reward notifications.
 local Players=game:GetService("Players")
 local Rep=game:GetService("ReplicatedStorage")
 local Run=game:GetService("RunService")
@@ -25,7 +25,7 @@ local function toast(v)
     task.delay(3.5,function()if n==generation then msg.Visible=false end end)
 end
 event.OnClientEvent:Connect(function(kind,payload)
-    if kind=="Treasure" or kind=="ColorFloor" or kind=="DailyChallenge" or kind=="Chest" then
+    if kind=="Treasure" then
         toast(payload)
     end
 end)
