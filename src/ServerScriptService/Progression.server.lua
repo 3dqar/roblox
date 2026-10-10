@@ -36,7 +36,7 @@ local function sync(p)
     local d = state[p]
     if d then remote:FireClient(p, "State", {
         coins=d.coins, lastDaily=d.lastDaily, effects=d.effects, equipped=d.equipped, premium=d.premium,
-        bestTime=d.bestTime, finished=d.finished, trails=d.trails, equippedTrail=d.equippedTrail
+        bestTime=d.bestTime, finished=d.finished, trails=d.trails, equippedTrail=d.equippedTrail, wheelDay=d.wheelDay, secrets=d.secrets
     }) end
 end
 local function attachEffect(p)
@@ -144,7 +144,7 @@ end
 Players.PlayerAdded:Connect(function(p)
     local d={coins=0, lastDaily=-1, effects={Rain=true}, premium={}, equipped="Rain", bestTime=0, finished=0, wheelDay=-1, secrets={}, start=os.clock(), trails={Aurora=true}, equippedTrail="Aurora", loaded=false}
     state[p]=d
-    local ok, value = false, nil
+    local ok, value = not store, nil
     if store then ok,value=pcall(function() return store:GetAsync(tostring(p.UserId)) end) end
     if ok and type(value)=="table" then
         d.coins=math.max(0, tonumber(value.coins) or 0)
