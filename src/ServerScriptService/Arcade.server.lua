@@ -179,14 +179,22 @@ task.spawn(function()
     while task.wait(24) do
         round+=1
         local correct=math.random(1,3)
-        for _,p in ipairs(Players:GetPlayers()) do notify(p,"ColorFloor","STAND ON "..names[correct].."! 5 SECONDS") end
+        -- Players must actually react to each call, rather than AFK-farm on a tile.
+        local before={}
+        for _,p in ipairs(Players:GetPlayers()) do
+            local root=p.Character and p.Character:FindFirstChild("HumanoidRootPart")
+            if root then before[p]=root.Position end
+            notify(p,"ColorFloor","MOVE TO "..names[correct].."! 5 SECONDS")
+        end
         task.wait(5)
         for _,p in ipairs(Players:GetPlayers()) do
-            local d=state[p];local char=p.Character
-            local root=char and char:FindFirstChild("HumanoidRootPart")
-            if d and root then
+            local d=state[p]
+            local root=p.Character and p.Character:FindFirstChild("HumanoidRootPart")
+            local start=before[p]
+            if d and root and start and (root.Position-start).Magnitude>=4 then
                 local pos=swatches[correct].Position
-                if math.abs(root.Position.X-pos.X)<=4.5 and math.abs(root.Position.Z-pos.Z)<=5 and math.abs(root.Position.Y-pos.Y)<=8 then
+                if math.abs(root.Position.X-pos.X)<=4.5 and math.abs(root.Position.Z-pos.Z)<=5
+                    and math.abs(root.Position.Y-pos.Y)<=8 then
                     pay(p,8)
                     notify(p,"ColorFloor","CORRECT COLOR! +8 Coins")
                 end
