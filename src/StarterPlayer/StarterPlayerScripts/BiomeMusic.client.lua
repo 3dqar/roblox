@@ -32,7 +32,7 @@ for _,name in ipairs(biomeNames) do
         songs[name]=sound
     end
 end
-local enabled=true
+local enabled=player:GetAttribute("MusicEnabled")~=false
 local active=nil
 local function update()
     local stage=player:FindFirstChild("leaderstats")
@@ -53,9 +53,9 @@ local function update()
         Tween:Create(active,TweenInfo.new(.9),{Volume=.24}):Play()
     end
 end
-toggle.Activated:Connect(function()
-    enabled=not enabled
-    toggle.Text=enabled and "♫ MUSIC: ON" or "♫ MUSIC: OFF"
+toggle.Visible=false -- music lives in the unified Settings menu
+player:GetAttributeChangedSignal("MusicEnabled"):Connect(function()
+    enabled=player:GetAttribute("MusicEnabled")~=false
     update()
 end)
 task.spawn(function()
