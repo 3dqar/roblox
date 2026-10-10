@@ -220,6 +220,9 @@ bonus.Event:Connect(function(p, action, key)
             if coins then coins.Value=d.coins end
             remote:FireClient(p,"WheelWon",payout)
         end
+    elseif action=="ColorRush" then
+        d.coins+=20
+        if coins then coins.Value=d.coins end
     elseif action=="DoubleJump" then
         if d.coins<80 then
             remote:FireClient(p,"PurchaseDenied","Need 80 Coins!")
