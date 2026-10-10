@@ -133,3 +133,10 @@ This repository was updated and checked via GitHub file reads, not executed in R
 - All new cosmetic effects use local-only particles to limit network load; no permanent character modifications are performed.
 
 Test mobile HUD safe zones, VFX after respawn, and actual sound playback with authorized IDs in a published private Studio test place before launching.
+
+## Trails expansion — Coins and Robux
+Seven cosmetic trails: Aurora (free), Fire (500 Coins), Ice (1,100 Coins), Rainbow (2,500 Coins), Galaxy (15 Robux), Lightning (25 Robux), Royal (40 Robux).
+- Coin trails are purchased with server-validated earned currency. Prices intentionally require substantial play.
+- Premium trails are **permanent Game Passes**, but their real IDs must be created in Roblox Creator Dashboard and pasted into `TrailPasses` in `Config.lua`. Configure matching 15/25/40 Robux prices in Dashboard. ID=0 means purchasing is disabled, not free.
+- Trail inventory, chosen style and unspent Coins persist in the v4 player DataStore in published servers (subject to API availability). Running particles are created only locally to reduce replication and do not change player speed.
+- Check that all Game Pass ownership checks succeed after purchasing, including rejoins. No real Robux purchases can be tested until passes are configured.
