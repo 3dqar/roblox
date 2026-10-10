@@ -75,7 +75,7 @@ local function spawnTreasures()
             local stamp=tostring(hour())..":"..i
             if d.treasures[stamp] then return end
             d.treasures[stamp]=true
-            pay(p,15)
+            pay(p,cfg.Economy.Treasure)
             notify(p,"Treasure","TREASURE FOUND! +15 Coins")
         end)
     end
@@ -141,7 +141,7 @@ finish.Touched:Connect(function(hit)
     if not run or not d or run.step~=6 or d.challengeDay>=day() then return end
     if os.clock()-run.started<4 then return end
     d.challengeDay=day();current[p]=nil
-    pay(p,100);notify(p,"DailyChallenge","DAILY OBBY COMPLETED! +100 Coins")
+    pay(p,cfg.Economy.DailyObby);notify(p,"DailyChallenge","DAILY OBBY COMPLETED! +100 Coins")
     task.spawn(save,p)
 end)
 -- Chest in lobby: free once per day (coins or frost cosmetic).
@@ -158,7 +158,7 @@ chestPrompt.Triggered:Connect(function(p)
         reward:Fire(p,"UnlockFrost")
         notify(p,"Chest","UNLOCKED FROST COSMETIC!")
     else
-        pay(p,40)
+        pay(p,cfg.Economy.ChestCoins)
         notify(p,"Chest","MYSTERY CHEST +40 Coins!")
     end
     task.spawn(save,p)
@@ -195,7 +195,7 @@ task.spawn(function()
                 local pos=swatches[correct].Position
                 if math.abs(root.Position.X-pos.X)<=4.5 and math.abs(root.Position.Z-pos.Z)<=5
                     and math.abs(root.Position.Y-pos.Y)<=8 then
-                    pay(p,8)
+                    pay(p,cfg.Economy.ColorFloor)
                     notify(p,"ColorFloor","CORRECT COLOR! +8 Coins")
                 end
             end
