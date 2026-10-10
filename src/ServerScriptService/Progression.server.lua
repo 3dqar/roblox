@@ -133,7 +133,7 @@ end
 local function save(p)
     local d=state[p]
     if not d or not d.loaded or not store then return end
-    local snapshot = {coins=d.coins, lastDaily=d.lastDaily, effects=d.effects, equipped=d.equipped, bestTime=d.bestTime, finished=d.finished}
+    local snapshot = {coins=d.coins, lastDaily=d.lastDaily, effects=d.effects, equipped=d.equipped, bestTime=d.bestTime, finished=d.finished, trails=d.trails, equippedTrail=d.equippedTrail}
     local success, err = pcall(function() store:SetAsync(tostring(p.UserId), snapshot) end)
     if not success then warn("V4 save failed", err) end
 end
@@ -142,7 +142,7 @@ local function leaderboard(p, best)
     pcall(function() rankings:SetAsync(tostring(p.UserId), math.floor(best * 100)) end)
 end
 Players.PlayerAdded:Connect(function(p)
-    local d={coins=0, lastDaily=-1, effects={Rain=true}, premium={}, equipped="Rain", bestTime=0, finished=0, wheelDay=-1, secrets={}, start=os.clock(), loaded=false}
+    local d={coins=0, lastDaily=-1, effects={Rain=true}, premium={}, equipped="Rain", bestTime=0, finished=0, wheelDay=-1, secrets={}, start=os.clock(), trails={Aurora=true}, equippedTrail="Aurora", loaded=false}
     state[p]=d
     local ok, value = false, nil
     if store then ok,value=pcall(function() return store:GetAsync(tostring(p.UserId)) end) end
@@ -156,6 +156,9 @@ Players.PlayerAdded:Connect(function(p)
         d.finished=tonumber(value.finished) or 0
         d.wheelDay=tonumber(value.wheelDay) or -1
         d.secrets=type(value.secrets)=="table" and value.secrets or {}
+        d.trails=type(value.trails)=="table" and value.trails or {Aurora=true}
+        d.trails.Aurora=true
+        d.equippedTrail=type(value.equippedTrail)=="string" and value.equippedTrail or "Aurora"
     elseif not ok and not Run:IsStudio() then
         p:Kick("Your rewards could not load. Please rejoin.")
         state[p]=nil
@@ -166,7 +169,15 @@ Players.PlayerAdded:Connect(function(p)
         if d.premium[name] then d.effects[name]=true end
     end
     if not d.effects[d.equipped] then d.equipped="Rain" end
+    for name,id in pairs(cfg.TrailPasses or {}) do
+        if id~=0 then
+            local success,has=pcall(function()return Market:UserOwnsGamePassAsync(p.UserId,id) end)
+            if success and has then d.trails[name]=true end
+        end
+    end
+    if not d.trails[d.equippedTrail] then d.equippedTrail="Aurora" end
     d.loaded=ok
+    p:SetAttribute("EquippedTrail",d.equippedTrail)
     local coins=Instance.new("IntValue")
     coins.Name="Coins"
     coins.Value=d.coins
@@ -270,7 +281,25 @@ end
 remote.OnServerEvent:Connect(function(p,action,arg)
     local d=state[p]
     if not d then return end
-    if action=="Effect" and type(arg)=="string" and owned[arg] then
+    if action=="Trail" and type(arg)=="string" then
+        local price=cfg.TrailCoinPrices and cfg.TrailCoinPrices[arg]
+        local pass=cfg.TrailPasses and cfg.TrailPasses[arg]
+        if arg~="Aurora" and not price and not pass then return end
+        if not d.trails[arg] then
+            if price then
+                if d.coins<price then return end
+                d.coins-=price
+                p.leaderstats.Coins.Value=d.coins
+                d.trails[arg]=true
+            elseif pass and pass~=0 then
+                local ok,has=pcall(function()return Market:UserOwnsGamePassAsync(p.UserId,pass) end)
+                if not ok or not has then return end
+                d.trails[arg]=true
+            else return end
+        end
+        d.equippedTrail=arg
+        p:SetAttribute("EquippedTrail",arg)
+    elseif action=="Effect" and type(arg)=="string" and owned[arg] then
         if cost[arg] and not d.effects[arg] then
             if d.coins<cost[arg] then return end
             d.coins-=cost[arg]
@@ -291,6 +320,18 @@ remote.OnServerEvent:Connect(function(p,action,arg)
 end)
 Market.PromptGamePassPurchaseFinished:Connect(function(p,passId,purchased)
     if not purchased or not state[p] then return end
+    for name,id in pairs(cfg.TrailPasses or {}) do
+        if id~=0 and passId==id then
+            local ok,has=pcall(function()return Market:UserOwnsGamePassAsync(p.UserId,id) end)
+            if ok and has then
+                state[p].trails[name]=true
+                state[p].equippedTrail=name
+                p:SetAttribute("EquippedTrail",name)
+                sync(p)
+                task.spawn(save,p)
+            end
+        end
+    end
     for name,id in pairs(cfg.EffectPasses or {}) do
         if id~=0 and passId==id and ownsPass(p,name) then
             local d=state[p]
