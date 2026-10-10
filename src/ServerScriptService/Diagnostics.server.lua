@@ -15,7 +15,7 @@ local function authorized(p)
     end
     return false
 end
-local REQUIRED_REMOTES={"ObbyRemote","V4Event","V4Query","AdventureEvent","AdventureRequest","ArcadeEvent","ColorRushEvent","PrestigeEvent","LobbyEnterRequest","BiomeFX"}
+local REQUIRED_REMOTES={"ObbyRemote","V4Event","V4Query","AdventureEvent","AdventureRequest","ArcadeEvent","ColorRushEvent","PrestigeEvent","LobbyEnterRequest","BiomeFX","TrollTrapFX"}
 local function audit()
     local lines={}
     local issues=0
@@ -64,6 +64,7 @@ local function audit()
         end
     end
     log(count==cfg.StageCount+1,"Checkpoint count: "..count.."/"..(cfg.StageCount+1))
+    log(world and world:FindFirstChild("TrollTraps")~=nil,"Optional troll trap folder")
     log(not Run:IsStudio() or cfg.StudioDataStores==false,"Studio data persistence mode correctly declared")
     if Run:IsStudio() and not cfg.StudioDataStores then
         table.insert(lines,"INFO  DataStores intentionally disabled in Studio")
