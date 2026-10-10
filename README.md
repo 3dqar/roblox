@@ -224,3 +224,6 @@ Source changes are committed to GitHub main. Roblox Studio was not available in 
 3. Press LOBBY midcourse: return to lobby and retain saved checkpoint. Press PLAY to resume; verify rank and Coins unchanged.
 4. View leaderboard boards from lobby spawn; global record values must be tested in a private **published** place with DataStores enabled. Verify fastest time and supporters appear after a qualifying speedrun or donation. Two boards currently refresh every 90 seconds.
 5. Check Studio Output errors and phone layouts. GitHub review **does not prove in-Studio correctness**.
+
+## Speedrun removal
+Speedrun gates, clock HUD, personal-best ghost recording and ghost controls were retired as requested. Normal 50-stage parkour and ordinary finish-time ranking remain intact. Treasure Hunt remains. The saved global fastest-times board still uses existing finish performance data; check its display in a published place. Gameplay has not been tested in Roblox Studio in this GitHub-only pass.
