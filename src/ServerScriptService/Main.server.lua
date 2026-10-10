@@ -73,10 +73,10 @@ local function death(p)
 end
 local function billboard(anchor, str, height)
     local gui = Instance.new("BillboardGui")
-    gui.Size = UDim2.fromOffset(190, 55)
+    gui.Size = UDim2.fromOffset(125, 32)
     gui.StudsOffsetWorldSpace = Vector3.new(0, height or 5, 0)
     gui.AlwaysOnTop = true
-    gui.MaxDistance = 80
+    gui.MaxDistance = 34
     gui.Parent = anchor
     local txt = Instance.new("TextLabel")
     txt.Size, txt.BackgroundTransparency = UDim2.fromScale(1, 1), 1
@@ -174,7 +174,7 @@ for i = 1, N + 1 do
     pads[i] = pad
     part("CheckpointBorder_" .. i, Vector3.new(15, 1, 15),
         CFrame.new(0, 10.5, z), Color3.fromRGB(39, 32, 83))
-    billboard(pad, i == N + 1 and "FINISH!" or (theme.name .. " • " .. i), 6)
+    billboard(pad, i == N + 1 and "FINISH!" or ("STAGE " .. i), 5)
     if i % 5 == 1 then
         local archColor = Color3.fromHSV(((i - 1) % 10) / 10, .75, 1)
         for _,side in ipairs({-1,1}) do
