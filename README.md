@@ -177,3 +177,20 @@ Note: Online GitHub review can verify source code and committed files, but **can
 7. Use a two-player Studio test to ensure one player's personal-best ghost never appears on the other player's screen.
 
 **Status:** committed GitHub source has been inspected; full Roblox Studio runtime, interaction, performance and physical-playability testing has **not** been performed here.
+
+## Mobile and Testing Tools Update
+- **Admin checkpoint teleport:** `AdminDiagnostics.client.lua` now has a CP 1–51 selector, + / - controls and TELEPORT action. `Diagnostics.server.lua` verifies admin membership, range, cooldown and target. Teleports do not increase saved Stage, grant Coins or unlock stages, and deliberately cancel active Speedrun/Prestige runs. In a published game add your numeric Roblox UserId to `Config.AdminUserIds`. Roblox Studio permits local diagnostic access.
+- **Low Graphics:** the main Settings panel includes `Low graphics`. A client-only `LowGraphics.client.lua` temporarily replaces generated map/lobby materials with SmoothPlastic and disables selected Lighting post-processing effects. Collision geometry and earned progress are unchanged; OFF restores the prior visuals. It is a visual-performance aid, **not a promise of any particular FPS**.
+- **Mobile UI:** the Trails shop access button moved to the lower left instead of competing with the right-hand thumb/jump area; the admin checkpoint picker has a mobile-friendlier separate label. Actual mobile device testing remains required.
+- The admin audit has also been adjusted to count yellow bounce-pad steps in checkpoint block diagnostics. It reports structural checks, not pathfinding or automated physics simulations.
+
+### Test protocol
+1. On Mac: `cd ~/Downloads/troll-obby && git pull && ~/Downloads/rojo serve`, connect Roblox Studio Rojo and start Play.
+2. Open ADMIN AUDIT. Press RUN SCAN, then use CP + / - to teleport to 1, 10, 11, 20, 21, 30, 31, 40, 41, 50 and 51. Confirm checkpoint Coins and saved Stage do not change because of the admin teleport.
+3. Test actual jumping around each waypoint. Admin teleport **cannot prove jump reachability** and does not replace traversing all 50 stages.
+4. Open Settings -> Low graphics ON/OFF. Confirm world materials/post-processing switch off and restore without altering collisions; compare Studio performance statistics on a real low-spec phone if possible.
+5. On Studio Device Emulator at multiple phone resolutions, verify Trails access on left, Double Jump/Wheel controls on right, and the admin window remains usable. Test normal Player UI without admin permission.
+6. Confirm the server refuses client admin teleport requests from non-admin players, plus out-of-range/fractional checkpoint values. Test in multi-client Studio session.
+7. Test speedrun/prestige cancellation after a teleport, and rejoining afterward. Check Studio Output for runtime errors.
+
+**Verification limit:** GitHub source changes were reviewed and saved to main, but this session cannot execute Roblox Studio. Confirm on-device behavior and performance before release.
