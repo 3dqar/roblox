@@ -44,7 +44,7 @@ local function setup(char)
         delta+=dt
         if delta<.14 then return end
         delta=0
-        if hum.MoveDirection.Magnitude>.2 and hum.FloorMaterial~=Enum.Material.Air then emitter:Emit(3) end
+        if player:GetAttribute("ParticlesEnabled")~=false and player:GetAttribute("TrailsEnabled")~=false and hum.MoveDirection.Magnitude>.2 and hum.FloorMaterial~=Enum.Material.Air then emitter:Emit(3) end
     end)
 end
 player.CharacterAdded:Connect(setup)
@@ -76,6 +76,12 @@ close.BackgroundColor3=Color3.fromRGB(60,65,111);close.Text="✕"
 close.TextColor3=Color3.new(1,1,1);close.Parent=panel;corner(close)
 close.Activated:Connect(function()panel.Visible=false end)
 launch.Activated:Connect(function()panel.Visible=not panel.Visible end)
+local function refreshTrailVisibility()
+    launch.Visible=player:GetAttribute("TrailsEnabled")~=false
+    if not launch.Visible then panel.Visible=false end
+end
+player:GetAttributeChangedSignal("TrailsEnabled"):Connect(refreshTrailVisibility)
+refreshTrailVisibility()
 local rows={}
 local function paint()
     for _,name in ipairs(names) do
