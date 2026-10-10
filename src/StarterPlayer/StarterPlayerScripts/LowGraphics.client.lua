@@ -5,7 +5,10 @@ local player=Players.LocalPlayer
 local originals={}
 local changed={}
 local function managedPart(p)
-    return p:IsA("BasePart") and (p:IsDescendantOf(workspace:FindFirstChild("GeneratedObby") or Instance.new("Folder")) or p:IsDescendantOf(workspace:FindFirstChild("WOW_LOBBY") or Instance.new("Folder")))
+    if not p:IsA("BasePart") then return false end
+    local map=workspace:FindFirstChild("GeneratedObby")
+    local lobby=workspace:FindFirstChild("WOW_LOBBY")
+    return (map and p:IsDescendantOf(map)) or (lobby and p:IsDescendantOf(lobby)) or false
 end
 local function setLow(on)
     for _,obj in ipairs(changed) do
