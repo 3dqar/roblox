@@ -26,7 +26,7 @@ Instance.new("UICorner",pane).CornerRadius=UDim.new(0,14)
 local size=Instance.new("UISizeConstraint")
 size.MaxSize=Vector2.new(690,570);size.MinSize=Vector2.new(300,230);size.Parent=pane
 local scroller=Instance.new("ScrollingFrame")
-scroller.Size=UDim2.new(1,-26,1,-104);scroller.Position=UDim2.fromOffset(13,53)
+scroller.Size=UDim2.new(1,-26,1,-143);scroller.Position=UDim2.fromOffset(13,53)
 scroller.BackgroundColor3=Color3.fromRGB(33,39,78);scroller.BorderSizePixel=0
 scroller.AutomaticCanvasSize=Enum.AutomaticSize.Y;scroller.CanvasSize=UDim2.new()
 scroller.ScrollBarThickness=6;scroller.Parent=pane
@@ -53,8 +53,8 @@ launch.Activated:Connect(function()pane.Visible=not pane.Visible end)
 close.Activated:Connect(function()pane.Visible=false end)
 local checkpoint=1
 local chooser=Instance.new("TextLabel")
-chooser.Position=UDim2.new(0,270,1,-42)
-chooser.Size=UDim2.new(1,-279,0,34)
+chooser.Position=UDim2.new(0,12,1,-86)
+chooser.Size=UDim2.new(1,-24,0,32)
 chooser.BackgroundTransparency=1
 chooser.TextColor3=Color3.new(1,1,1)
 chooser.Font=Enum.Font.GothamBold;chooser.TextSize=13
