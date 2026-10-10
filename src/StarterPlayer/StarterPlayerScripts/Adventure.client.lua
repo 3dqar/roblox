@@ -4,6 +4,7 @@ local Tween=game:GetService("TweenService")
 local Input=game:GetService("UserInputService")
 local Run=game:GetService("RunService")
 local player=Players.LocalPlayer
+local mobile=Input.TouchEnabled
 local obby=Rep:WaitForChild("ObbyRemote")
 local v4=Rep:WaitForChild("V4Event")
 local event=Rep:WaitForChild("AdventureEvent")
@@ -14,14 +15,16 @@ local function pill(name,title,y,color)
     local b=Instance.new("TextButton")
     b.Name=name;b.Text=title;b.TextSize=13;b.Font=Enum.Font.GothamBold
     b.TextColor3=Color3.new(1,1,1);b.BackgroundColor3=color
-    b.Size=UDim2.fromOffset(135,32);b.Position=UDim2.new(0,12,0.5,y)
+    b.Size=UDim2.fromOffset(mobile and 145 or 135,mobile and 48 or 32)
+    b.Position=mobile and UDim2.new(1,-158,.5,y) or UDim2.new(0,12,.5,y)
     b.Parent=gui
     Instance.new("UICorner",b).CornerRadius=UDim.new(0,9)
+    if mobile then b.TextSize=14 end
     return b
 end
-local wheel=pill("Wheel","🎡 DAILY WHEEL",-95,Color3.fromRGB(121,70,228))
-local jump=pill("Jump","⚡ DOUBLE JUMP",-56,Color3.fromRGB(33,170,130))
-local timer=pill("Timer","⏱ 00:00",-17,Color3.fromRGB(29,33,75))
+local wheel=pill("Wheel","🎡 DAILY WHEEL",-116,Color3.fromRGB(121,70,228))
+local jump=pill("Jump","⚡ DOUBLE JUMP",-59,Color3.fromRGB(33,170,130))
+local timer=pill("Timer","⏱ 00:00",-2,Color3.fromRGB(29,33,75))
 timer.Active=false;timer.AutoButtonColor=false;timer.Visible=false
 local status=Instance.new("TextLabel")
 status.AnchorPoint=Vector2.new(.5,0)
