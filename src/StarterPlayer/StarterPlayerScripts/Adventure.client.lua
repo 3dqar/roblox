@@ -3,6 +3,8 @@ local Rep=game:GetService("ReplicatedStorage")
 local Tween=game:GetService("TweenService")
 local Input=game:GetService("UserInputService")
 local Run=game:GetService("RunService")
+local Market=game:GetService("MarketplaceService")
+local cfg=require(Rep:WaitForChild("Config"))
 local player=Players.LocalPlayer
 local mobile=Input.TouchEnabled
 local obby=Rep:WaitForChild("ObbyRemote")
@@ -44,7 +46,15 @@ end
 -- Only the SERVER may fire BindableEvent; use a dedicated, validated RemoteEvent.
 local request=Rep:WaitForChild("AdventureRequest")
 wheel.Activated:Connect(function() request:FireServer("Wheel") end)
-jump.Activated:Connect(function() request:FireServer("DoubleJump") end)
+jump.Activated:Connect(function()
+    if player:GetAttribute("HasDoubleJump") then
+        show("⚡ Double Jump ready — tap JUMP twice in the air!")
+        return
+    end
+    local id=cfg.AbilityPasses and cfg.AbilityPasses.DoubleJump or 0
+    if id==0 then show("Double Jump pass is not configured yet.") return end
+    Market:PromptGamePassPurchase(player,id)
+end)
 local speedrunStart=nil
 Run.RenderStepped:Connect(function()
     if speedrunStart then
@@ -66,7 +76,7 @@ v4.OnClientEvent:Connect(function(kind,value)
     if kind=="WheelWon" then show("🎡 YOU WON +"..tostring(value).." COINS!")
     elseif kind=="WheelEffect" then show("🎡 RARE REWARD: "..tostring(value).." EFFECT!")
     elseif kind=="SecretFound" then show("🔑 SECRET FOUND! +35 COINS")
-    elseif kind=="BoostUnlocked" then show("⚡ Double Jump available for 3 minutes!")
+    elseif kind=="BoostUnlocked" then show("⚡ Permanent Double Jump unlocked!")
     elseif kind=="PurchaseDenied" then show(tostring(value))
     end
 end)
@@ -110,8 +120,7 @@ player.CharacterAdded:Connect(setup)
 if player.Character then setup(player.Character) end
 Input.JumpRequest:Connect(function()
     local hum=player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-    local expiration=player:GetAttribute("DoubleJumpUntil") or 0
-    if hum and os.time()<expiration and hum.FloorMaterial==Enum.Material.Air and not extraUsed then
+    if hum and player:GetAttribute("HasDoubleJump")==true and hum.FloorMaterial==Enum.Material.Air and not extraUsed then
         extraUsed=true
         hum:ChangeState(Enum.HumanoidStateType.Jumping)
         local root=player.Character:FindFirstChild("HumanoidRootPart")
