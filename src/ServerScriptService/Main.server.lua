@@ -7,6 +7,8 @@ local Lighting = game:GetService("Lighting")
 local Tween = game:GetService("TweenService")
 local Config = require(Rep:WaitForChild("Config"))
 local N = Config.StageCount
+local biomeFX=Rep:FindFirstChild("BiomeFX") or Instance.new("RemoteEvent")
+biomeFX.Name="BiomeFX";biomeFX.Parent=Rep
 local remote = Rep:FindFirstChild("ObbyRemote") or Instance.new("RemoteEvent")
 remote.Name = "ObbyRemote"
 remote.Parent = Rep
