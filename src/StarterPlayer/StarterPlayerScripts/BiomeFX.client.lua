@@ -27,13 +27,7 @@ local blur=Instance.new("BlurEffect")
 blur.Name="IntroBlur";blur.Size=0;blur.Parent=game:GetService("Lighting")
 local playing=false
 local begin=button("▶ ENTER OBBY",UDim2.new(.5,-120,1,-115),UDim2.fromOffset(240,53),function()
-    local lobby=workspace:FindFirstChild("WOW_LOBBY")
-    local portal=lobby and lobby:FindFirstChild("START_PORTAL")
-    local char=player.Character
-    if portal and char then
-        char:PivotTo(portal.CFrame*CFrame.new(0,0,-5))
-        -- Lobby portal server-side Touched event owns checkpoint teleport.
-    end
+    Rep:WaitForChild("LobbyEnterRequest"):FireServer()
 end)
 begin.Visible=false
 local prestige=Rep:WaitForChild("PrestigeEvent")
