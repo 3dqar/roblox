@@ -209,3 +209,18 @@ Source changes are committed to GitHub main. Roblox Studio was not available in 
 - Add a troll difficulty toggle or a short no-troll onboarding zone for first-time players.
 - Track trap discoveries as a non-currency collection badge to encourage exploration without adding inflation.
 - Check accessibility: avoid strong flashing or forced camera shaking by default.
+
+## Lean UI cleanup (2026-10-11)
+- WORLDS button removed and replaced with **⌂ LOBBY**, available only while on the parkour. Server `ReturnToLobby` event returns the player to lobby without resetting saved stage, but cancels an active speedrun/prestige attempt.
+- Retired Color Rush, Color Floor, Photo Zone, Daily Obby, and daily Mystery Chest. Color Rush script paths are intentionally retained as no-op files for safe Rojo syncing. Treasure Hunt and the private personal-best ghost remain.
+- Reduced checkpoint billboard size and visibility distance to prevent large overhead labels blocking parkour view.
+- Simplified bottom nav (SHOP, QUESTS, HELP, SETTINGS), fixed auto-scaled oversized button lettering, moved Effects / Top Players / Stats dock to the upper right to reduce overlapping rows.
+- Reoriented the two lobby leaderboard SurfaceGuis toward the center of the lobby and adjusted fallback messaging in Studio. **Published OrderedDataStores are required for global ranking data**; Studio with `StudioDataStores=false` will show placeholder text by design.
+- Updated ADMIN AUDIT to stop expecting removed activities.
+
+### Validate in Studio
+1. Run `git pull`, stop the old Rojo server with Ctrl+C, start `~/Downloads/rojo serve`, reconnect and Play.
+2. Verify only SHOP/QUESTS/HELP/SETTINGS and other intended buttons show; no WORLDS or COLOR RUSH; no Color Floor / Photo Zone / Daily Obby / Chest in workspace.
+3. Press LOBBY midcourse: return to lobby and retain saved checkpoint. Press PLAY to resume; verify rank and Coins unchanged.
+4. View leaderboard boards from lobby spawn; global record values must be tested in a private **published** place with DataStores enabled. Verify fastest time and supporters appear after a qualifying speedrun or donation. Two boards currently refresh every 90 seconds.
+5. Check Studio Output errors and phone layouts. GitHub review **does not prove in-Studio correctness**.
