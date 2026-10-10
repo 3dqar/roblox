@@ -227,3 +227,13 @@ Source changes are committed to GitHub main. Roblox Studio was not available in 
 
 ## Speedrun removal
 Speedrun gates, clock HUD, personal-best ghost recording and ghost controls were retired as requested. Normal 50-stage parkour and ordinary finish-time ranking remain intact. Treasure Hunt remains. The saved global fastest-times board still uses existing finish performance data; check its display in a published place. Gameplay has not been tested in Roblox Studio in this GitHub-only pass.
+
+## Automatic Creator Store decoration layout
+
+`DecorSpawner.server.lua` reads **Workspace/ManualDecor** (models imported manually into the Roblox Studio place, not synced by GitHub), then builds **Workspace/GeneratedDecor** during Play. Expected template names from your Explorer: `Low Poly Tree Pack`, `QBit Low Poly Asset`, `BauLowPoly`, `Blue Bush`, `Candy`, `Chest`, `Island`, `Low poly`, `MapleStory Portal...`, `lamp bench`, `PineTree`, `Asteroid`. It accepts folder-based template packs as well. Asset names/types determine which samples are selected, so visual accuracy depends on actual asset structure.
+
+The layout puts a handful of trees, benches, portal trim and small decorative islands near the lobby and sparse scenery outside the critical obby path in Lava, Ice, Candy, Space and Cyber. Optional display-only treasure chest meshes overlay current HourlyTreasure props. All **spawned copies** have scripts removed, are anchored and noncolliding. Source templates remain untouched. **Remove any untrusted scripts from imported original models too**, since source models inside Workspace can still execute.
+
+To test: save the Studio place containing ManualDecor, stop Play, `git pull`, restart `~/Downloads/rojo serve`, reconnect Rojo, and Play. Check the Studio Output line `[Decor] Auto layout complete: ... props from ManualDecor`; open Workspace/GeneratedDecor to inspect placement. Move, rename or replace source templates in Edit mode if a decoration looks wrong, then restart Play. The generated decoration folder is rebuilt every Play. Rojo alone does **not** upload Roblox Creator Store models to GitHub. Published places must include the ManualDecor assets in the published place.
+
+**Limitations:** Placement is programmed from the names and expected dimensions, not confirmed in Roblox Studio. Some Creator Store packs contain giant nested assemblies or unusual pivots; those may need manual adjustments. Verify portal remains usable, jump paths remain clear, no source scripts run, and treasure visuals align.
