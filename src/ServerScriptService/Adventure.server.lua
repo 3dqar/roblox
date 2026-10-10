@@ -58,27 +58,6 @@ for index,stage in ipairs({4,14,24}) do
     local bridge=build(secrets,"SecretBridge_"..index,Vector3.new(12,1.3,5),
         CFrame.new(x/2,11.6,z+22),Color3.fromRGB(116,93,235))
 end
-local zone=Instance.new("Folder")
-zone.Name="PhotoZone"
-zone.Parent=lobby
-local center=Vector3.new(0,68,-180)+Vector3.new(32,0,5)
-local photoFloor=build(zone,"PhotoStage",Vector3.new(24,2,19),CFrame.new(center),
-    Color3.fromRGB(36,42,90),Enum.Material.Marble)
-local backdrop=build(zone,"PhotoBackdrop",Vector3.new(24,19,2),
-    CFrame.new(center+Vector3.new(0,10,9)),Color3.fromRGB(108,65,226),Enum.Material.SmoothPlastic)
-textSign(backdrop,"PHOTO ZONE 📸")
-for i=1,10 do
-    local angle=i*math.pi/5
-    local r=build(zone,"PhotoLight",Vector3.new(2.5,2.5,2.5),
-        CFrame.new(center+Vector3.new(math.sin(angle)*10,5+math.cos(angle)*5,math.cos(angle)*7)),
-        Color3.fromHSV(i/10,.7,1),Enum.Material.Neon)
-    r.Shape=Enum.PartType.Ball;r.CanCollide=false
-end
-local prompt=Instance.new("ProximityPrompt")
-prompt.ActionText="Take photo";prompt.ObjectText="TROLL OBBY PHOTO ZONE"
-prompt.HoldDuration=.3;prompt.MaxActivationDistance=14;prompt.Parent=photoFloor
-prompt.Triggered:Connect(function(p) remote:FireClient(p,"Photo",center) end)
-
 -- Lobby start gate: optional speedrun from stage one, existing portal remains normal play.
 local gate=build(lobby,"SpeedrunGate",Vector3.new(14,13,2),
     CFrame.new(Vector3.new(-29,82,-180)+Vector3.new(0,0,26)),
