@@ -1,4 +1,4 @@
--- TROLL OBBY Arcade: hourly treasure, color floor, daily obby, free chest, personal race ghost.
+-- Simplified arcade: hourly treasure hunt and private personal-best ghost.
 local Players=game:GetService("Players")
 local Rep=game:GetService("ReplicatedStorage")
 local DSS=game:GetService("DataStoreService")
@@ -133,9 +133,9 @@ task.spawn(function()
         end
     end
 end)
-Players.PlayerRemoving:Connect(function(p)save(p);state[p]=nil;track[p]=nil;current[p]=nil end)
+Players.PlayerRemoving:Connect(function(p)save(p);state[p]=nil;track[p]=nil end)
 game:BindToClose(function()
     for _,p in ipairs(Players:GetPlayers()) do task.spawn(save,p) end
     task.wait(2)
 end)
-print("Arcade: treasure, color floor, daily obby, chest, and ghost enabled")
+print("Arcade: treasure and personal ghost enabled")
