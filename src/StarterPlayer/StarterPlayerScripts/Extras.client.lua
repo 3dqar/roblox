@@ -175,22 +175,42 @@ task.spawn(function()
     if ok then update(d) end
 end)
 
+local currentVictory
 local function victory(seconds)
-    local win=frame(gui,"Victory",UDim2.fromScale(.5,.5),UDim2.new(.85,0,0,230))
+    if currentVictory then currentVictory:Destroy() end
+    local win=frame(gui,"Victory",UDim2.fromScale(.5,.5),UDim2.new(.88,0,0,285))
+    currentVictory=win
     win.AnchorPoint=Vector2.new(.5,.5)
     local limit=Instance.new("UISizeConstraint")
-    limit.MaxSize=Vector2.new(450,230)
+    limit.MaxSize=Vector2.new(465,285);limit.MinSize=Vector2.new(270,285)
     limit.Parent=win
-    label(win,"🏆 YOU DID IT! 🎉",UDim2.fromOffset(10,24),UDim2.new(1,-20,0,65),29,true)
-    label(win,"Finished in "..tostring(seconds).." seconds! +250 coins",UDim2.fromOffset(15,95),UDim2.new(1,-30,0,55),17,false)
-    button(win,"AWESOME!",UDim2.new(.2,0,1,-60),UDim2.new(.6,0,0,43),palette.mint,function() win:Destroy() end)
-    for i=1,28 do
-        local square=frame(gui,"Confetti",UDim2.fromScale(math.random(),-.07),UDim2.fromOffset(8,13),
-            Color3.fromHSV(math.random(),.8,1))
-        local tween=Tween:Create(square,TweenInfo.new(math.random(15,32)/10,Enum.EasingStyle.Quad),{
-            Position=UDim2.fromScale(math.random(),1.04),Rotation=math.random(-360,360)})
+    local accent=Instance.new("UIStroke")
+    accent.Color=Color3.fromRGB(255,215,97);accent.Thickness=2;accent.Parent=win
+    local gradient=Instance.new("UIGradient")
+    gradient.Color=ColorSequence.new(Color3.fromRGB(59,34,118),Color3.fromRGB(22,30,71))
+    gradient.Rotation=90;gradient.Parent=win
+    label(win,"🏆 YOU CONQUERED ALL 5 WORLDS!",UDim2.fromOffset(16,18),UDim2.new(1,-32,0,70),25,true)
+    label(win,"🌋 LAVA  ❄️ ICE  🍭 CANDY  🪐 SPACE  ⚡ CYBER",
+        UDim2.fromOffset(13,91),UDim2.new(1,-26,0,48),15,true)
+    label(win,"Time: "..tostring(seconds).."s  •  +"..tostring(config.Economy and config.Economy.Finish or 250).." Coins",
+        UDim2.fromOffset(16,154),UDim2.new(1,-32,0,35),17,true)
+    button(win,"🎉 AWESOME!",UDim2.new(.2,0,1,-61),UDim2.new(.6,0,0,44),palette.mint,function()
+        if currentVictory==win then currentVictory=nil end
+        win:Destroy()
+    end)
+    if player:GetAttribute("ParticlesEnabled")==false then return end
+    for i=1,38 do
+        local square=Instance.new("Frame")
+        square.Name="VictoryConfetti";square.BorderSizePixel=0
+        square.Size=UDim2.fromOffset(math.random(5,11),math.random(9,16))
+        square.Position=UDim2.fromScale(math.random(),-.05)
+        square.BackgroundColor3=Color3.fromHSV(math.random(),.85,1)
+        square.Rotation=math.random(-45,45)
+        square.Parent=gui
+        local tween=Tween:Create(square,TweenInfo.new(math.random(18,35)/10,Enum.EasingStyle.Quad),{
+            Position=UDim2.fromScale(math.random(),1.06),Rotation=math.random(-300,300)})
+        tween.Completed:Once(function()square:Destroy()end)
         tween:Play()
-        tween.Completed:Connect(function() square:Destroy() end)
     end
 end
 event.OnClientEvent:Connect(function(kind,value)
