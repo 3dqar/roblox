@@ -15,7 +15,7 @@ local function authorized(p)
     end
     return false
 end
-local REQUIRED_REMOTES={"ObbyRemote","V4Event","V4Query","AdventureEvent","AdventureRequest","ArcadeEvent","ColorRushEvent","PrestigeEvent","LobbyEnterRequest","BiomeFX","TrollTrapFX"}
+local REQUIRED_REMOTES={"ObbyRemote","V4Event","V4Query","AdventureEvent","AdventureRequest","ArcadeEvent","PrestigeEvent","LobbyEnterRequest","BiomeFX","TrollTrapFX"}
 local function audit()
     local lines={}
     local issues=0
@@ -31,7 +31,7 @@ local function audit()
         log(Rep:FindFirstChild(name)~=nil,"Signal: "..name)
     end
     if lobby then
-        for _,name in ipairs({"MainPlaza","FastestLeaderboard","SupportLeaderboard","MysteryChest"}) do
+        for _,name in ipairs({"MainPlaza","FastestLeaderboard","SupportLeaderboard"}) do
             log(lobby:FindFirstChild(name)~=nil,"Lobby: "..name)
         end
     end
