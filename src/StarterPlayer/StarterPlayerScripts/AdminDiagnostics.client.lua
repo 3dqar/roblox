@@ -51,6 +51,35 @@ local scan=btn("RUN SCAN",12)
 local close=btn("CLOSE",142)
 launch.Activated:Connect(function()pane.Visible=not pane.Visible end)
 close.Activated:Connect(function()pane.Visible=false end)
+local checkpoint=1
+local chooser=Instance.new("TextLabel")
+chooser.Position=UDim2.new(0,270,1,-42)
+chooser.Size=UDim2.new(1,-279,0,34)
+chooser.BackgroundTransparency=1
+chooser.TextColor3=Color3.new(1,1,1)
+chooser.Font=Enum.Font.GothamBold;chooser.TextSize=13
+chooser.Text="Checkpoint: 1";chooser.Parent=pane
+local function makeSmall(text,anchor,fn)
+    local b=Instance.new("TextButton")
+    b.Position=anchor;b.Size=UDim2.fromOffset(35,32)
+    b.Text=text;b.TextSize=18;b.Font=Enum.Font.GothamBold
+    b.TextColor3=Color3.new(1,1,1);b.BackgroundColor3=Color3.fromRGB(78,86,154)
+    b.Parent=pane;Instance.new("UICorner",b).CornerRadius=UDim.new(0,8)
+    b.Activated:Connect(fn)
+end
+local function refresh() chooser.Text="CP "..checkpoint.."/"..cfg.StageCount+1 end
+makeSmall("−",UDim2.new(.52,0,1,-42),function()checkpoint=math.max(1,checkpoint-1);refresh()end)
+makeSmall("+",UDim2.new(.62,0,1,-42),function()checkpoint=math.min(cfg.StageCount+1,checkpoint+1);refresh()end)
+local jump=Instance.new("TextButton")
+jump.Position=UDim2.new(.74,0,1,-42);jump.Size=UDim2.new(.24,-8,0,32)
+jump.Text="TELEPORT";jump.TextSize=12;jump.Font=Enum.Font.GothamBold
+jump.TextColor3=Color3.new(1,1,1);jump.BackgroundColor3=Color3.fromRGB(46,172,142)
+jump.Parent=pane;Instance.new("UICorner",jump).CornerRadius=UDim.new(0,8)
+jump.Activated:Connect(function()
+    local ok,success,message=pcall(function()return Rep:WaitForChild("AdminCheckpointTeleport"):InvokeServer(checkpoint) end)
+    output.Text=ok and tostring(message) or ("Teleport error: "..tostring(success))
+end)
+refresh()
 local busy=false
 scan.Activated:Connect(function()
     if busy then return end
