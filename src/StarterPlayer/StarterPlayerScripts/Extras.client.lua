@@ -1,4 +1,4 @@
--- TROLL OBBY v4 extras: daily gifts, pets, leaderboard and victory celebration.
+-- TROLL OBBY extras: visual effects, records, and victory celebration.
 local Players = game:GetService("Players")
 local Rep = game:GetService("ReplicatedStorage")
 local Tween = game:GetService("TweenService")
@@ -51,6 +51,17 @@ local function button(parent,value,pos,size,color,cb)
     b.BorderSizePixel=0
     b.Parent=parent
     round(b,10)
+    local outline=Instance.new("UIStroke")
+    outline.Color=palette.white
+    outline.Transparency=.85
+    outline.Thickness=1
+    outline.Parent=b
+    b.MouseEnter:Connect(function()
+        Tween:Create(outline,TweenInfo.new(.15),{Transparency=.4}):Play()
+    end)
+    b.MouseLeave:Connect(function()
+        Tween:Create(outline,TweenInfo.new(.15),{Transparency=.85}):Play()
+    end)
     b.Activated:Connect(cb)
     return b
 end
