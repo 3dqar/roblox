@@ -88,6 +88,17 @@ arcade.Parent=lobby
 local o=Vector3.new(0,72,-270)
 local entrance=block(arcade,"ChallengeStart",o,Vector3.new(13,2,13),Color3.fromRGB(72,228,170))
 panel(entrance,"DAILY OBBY +100")
+local gatePrompt=Instance.new("ProximityPrompt")
+gatePrompt.ActionText="Enter Daily Obby"
+gatePrompt.ObjectText="Daily Challenge"
+gatePrompt.MaxActivationDistance=16
+local gateway=block(lobby,"DailyChallengePortal",Vector3.new(-28,80,-154),Vector3.new(9,12,2),Color3.fromRGB(48,207,169))
+gateway.CanCollide=false;gateway.Transparency=.4;panel(gateway,"DAILY OBBY")
+gatePrompt.Parent=gateway
+gatePrompt.Triggered:Connect(function(p)
+    local c=p.Character
+    if c then c:PivotTo(CFrame.new(o+Vector3.new(0,6,0))) end
+end)
 local gates={}
 local colors={Color3.fromRGB(240,82,106),Color3.fromRGB(61,179,246),Color3.fromRGB(68,221,139)}
 for i=1,6 do
@@ -99,6 +110,14 @@ end
 local finish=block(arcade,"DailyFinish",o+Vector3.new(0,0,63),Vector3.new(13,2,13),Color3.fromRGB(255,205,64))
 panel(finish,"DAILY FINISH +100")
 local current={}
+local exitPrompt=Instance.new("ProximityPrompt")
+exitPrompt.ActionText="Return to Lobby"
+exitPrompt.ObjectText="Daily Obby Exit"
+exitPrompt.MaxActivationDistance=12
+exitPrompt.Parent=finish
+exitPrompt.Triggered:Connect(function(p)
+    if p.Character then p.Character:PivotTo(CFrame.new(0,78,-180)) end
+end)
 entrance.Touched:Connect(function(hit)
     local model=hit:FindFirstAncestorOfClass("Model");local p=model and Players:GetPlayerFromCharacter(model)
     if p then current[p]={step=0,started=os.clock()} end
@@ -154,7 +173,6 @@ task.spawn(function()
     while task.wait(24) do
         round+=1
         local correct=math.random(1,3)
-        notifyAll=nil
         for _,p in ipairs(Players:GetPlayers()) do notify(p,"ColorFloor","STAND ON "..names[correct].."! 5 SECONDS") end
         task.wait(5)
         for _,p in ipairs(Players:GetPlayers()) do
