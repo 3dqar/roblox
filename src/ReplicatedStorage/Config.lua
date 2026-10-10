@@ -1,5 +1,6 @@
 return {
     StageCount = 50,
+    MusicAssetIds = {Lava=0, Ice=0, Candy=0, Space=0, Cyber=0}, -- paste permitted audio IDs; zero plays silence
     StudioDataStores = false, -- Set true only for published test place with API enabled
     SkipStageProductId = 0, -- Creator Dashboard Developer Product
     VipPassId = 0, -- Creator Dashboard Game Pass
