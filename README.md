@@ -98,3 +98,18 @@ Stop your previous Rojo server first (Control+C). Avoid copying files manually.
 - Race Against Ghost: sample and play back your previous best speedrun path using a non-collidable translucent ghost (up to 500 half-second samples).
 
 Studio testing and verification still required. All 5 features are source-level implemented but Roblox Studio was not available for playtest. Daily rewards and ghost persistence require a published place and working DataStores; StudioDataStores=false keeps test progress session-only. Test portals, coin payouts, replay and mobile layouts privately before public launch.
+
+## Creator Store free art shortlist (October 2026)
+These are specific "Get Model" entries identified in Roblox Creator Store, not automatically installed and not personally tested inside Roblox Studio:
+- Low Poly Tree (456 triangles): https://create.roblox.com/store/asset/80500557091895/Low-Poly-Tree
+- Low poly tree pack (10 mesh parts): https://create.roblox.com/store/asset/14447476012/Low-poly-tree-pack
+- Low-Poly Tree (306 triangles): https://create.roblox.com/store/asset/3287226226/LowPoly-Tree
+- Crystal/Gems pack (21 mesh parts): https://create.roblox.com/store/asset/18638490438
+- Crystal Pack: https://create.roblox.com/store/asset/686276613/Crystal-Pack
+Prefer lighter tree assets for repeated placement; use crystal packs sparingly. Examine asset details, creator/license, child scripts and mesh complexity before using. If the model contains unknown Script/LocalScript/ModuleScript, remove or disable them before Play. Do not add script-loaded free model portals: use the existing configured portal trigger.
+
+### Recommended placement
+Place a few decorative models in Studio Workspace under a custom "ManualDecor" folder, not in "GeneratedObby" or "WOW_LOBBY", since those two are programmatically regenerated when Play runs. Position tree packs by lobby perimeters, rock islands at the sides of the 50-stage course, and a handful of crystal clusters around the portal, Mystery Chest and Photo Zone. Set decorative model collisions off where appropriate; test mobile performance.
+
+### Personal ghost quality / scalability
+Ghost is created **only in Arcade.client.lua on the local client**; the server sends each player their own saved best samples only. One ghost is shown at a time and the prior one is destroyed. It is not replicated to other players. The stored record now has a bounded 600-sample budget with fixed 0.5-second intervals (roughly 5 minutes of track). Old hourly treasure collection stamps are pruned.
