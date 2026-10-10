@@ -195,12 +195,12 @@ for i = 1, N + 1 do
     end)
     if i <= N then
         local difficulty = 1 + math.floor((i - 1) / 8)
-        for j = 1, 4 do
-            local x = (j % 2 == 0) and 2.8 or -2.8
-            local zstep = z + 11 * j
-            local width = math.max(5.4, 10 - difficulty)
+        for j = 1, 5 do
+            local x = (j % 2 == 0) and 4 or -4
+            local zstep = z + 9 * j
+            local width = math.max(5.8, 9 - difficulty * .7)
             local obstacle = part(("Step_%02d_%d"):format(i, j),
-                Vector3.new(width, 1.7, 8.4), CFrame.new(x, 12, zstep), color)
+                Vector3.new(width, 1.7, 7.6), CFrame.new(x, 12, zstep), color)
             if i % 4 == 0 and j == 2 then
                 obstacle.Name = "FallingPlatform"
                 obstacle.Touched:Connect(function(hit)
@@ -227,9 +227,9 @@ for i = 1, N + 1 do
                     CFrame.new(x, 14, zstep), Color3.fromRGB(255, 65, 89), Enum.Material.Neon)
                 death(trap)
             end
-            if j == 1 or j == 4 then
+            if j == 1 or j == 5 then
                 part("PlatformTrim", Vector3.new(width, 0.3, 1),
-                    CFrame.new(x, 13, zstep - 3.7), Color3.fromRGB(255, 255, 255), Enum.Material.Neon)
+                    CFrame.new(x, 13, zstep - 3.3), Color3.fromRGB(255, 255, 255), Enum.Material.Neon)
             end
         end
     end
