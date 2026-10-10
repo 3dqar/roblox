@@ -82,12 +82,12 @@ local function toast(message)
 end
 
 -- Floating quick-access dock above the existing bottom menu
-local dock=frame(gui,"ExtrasDock",UDim2.new(.5,0,1,-92),UDim2.new(.72,0,0,42))
-dock.AnchorPoint=Vector2.new(.5,1)
+local dock=frame(gui,"ExtrasDock",UDim2.new(1,-16,0,278),UDim2.fromOffset(230,38))
+dock.AnchorPoint=Vector2.new(1,0)
 dock.BackgroundTransparency=.05
 local dockLimit=Instance.new("UISizeConstraint")
-dockLimit.MinSize=Vector2.new(240,42)
-dockLimit.MaxSize=Vector2.new(410,42)
+dockLimit.MinSize=Vector2.new(200,38)
+dockLimit.MaxSize=Vector2.new(230,38)
 dockLimit.Parent=dock
 local views={}
 local function closeViews()
@@ -111,7 +111,7 @@ local leaders=popup("Leaders","🏆 FASTEST PLAYERS")
 local stats=popup("Statistics","📊 YOUR STATS")
 local modalNames={{"✨",pets},{"🏆",leaders},{"📊",stats}}
 for i,v in ipairs(modalNames) do
-    button(dock,v[1],UDim2.new((i-1)/3,4,0,5),UDim2.new(1/3,-8,0,31),palette.panel,function()
+    button(dock,v[1],UDim2.new((i-1)/3,4,0,5),UDim2.new(1/3,-8,0,28),palette.panel,function()
         local current=v[2].Visible
         closeViews()
         v[2].Visible=not current
