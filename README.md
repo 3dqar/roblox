@@ -123,3 +123,13 @@ Ghost is created **only in Arcade.client.lua on the local client**; the server s
 
 ## Quality assurance still required
 This repository was updated and checked via GitHub file reads, not executed in Roblox Studio. Verify all five biome transitions, bounce trajectories, PLAY portal, Prestige start/completion/respawn, mobile button overlap and device performance. Prestige is a replay challenge and does **not** currently reset the main saved Stage; that is intentional to avoid data loss. This version does not yet grant special currency for completing a Prestige loop.
+
+## Character polish and audio update
+- New `DeathFX.client.lua`: short client-only rainbow particle burst when the local avatar dies, automatically removed after 2 seconds.
+- `MovementFX.client.lua`: four selectable running trails, Aurora / Fire / Ice / Rainbow. Lightweight particles only appear while moving on the ground. Choose via the TRAIL button.
+- `Adventure.client.lua`: larger, easier-to-touch mobile controls with repositioned buttons; PC positioning remains as before.
+- `BiomeMusic.client.lua`: fades music between Lava, Ice, Candy, Space and Cyber themes; simple MUSIC ON/OFF button.
+- To activate music, paste **permitted Roblox audio IDs** into `MusicAssetIds` in `Config.lua`. Defaults are all zero, so music will remain silent until configured. Make sure your experience has permission to play each sound.
+- All new cosmetic effects use local-only particles to limit network load; no permanent character modifications are performed.
+
+Test mobile HUD safe zones, VFX after respawn, and actual sound playback with authorized IDs in a published private Studio test place before launching.
