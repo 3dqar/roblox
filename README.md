@@ -83,3 +83,9 @@ git pull
 ~/Downloads/rojo serve
 ```
 Stop your previous Rojo server first (Control+C). Avoid copying files manually.
+
+## Color Rush update
+- Removed the old +75 Coins Daily Reward from UI and server to prevent overlapping daily bonuses. Daily Lucky Wheel remains.
+- Added COLOR RUSH, a free color-memory challenge: watch a sequence of four Red/Black/Green tiles, repeat it, earn 20 Coins on success. 90-second cooldown between completed rounds; no Coins/Robux stakes or losses. This is **not** a roulette or casino and does not grant 2x/5x bet payouts, which are prohibited by Roblox simulated-gambling rules.
+- Server validates game sequence, timing and rewards. UI is in `ColorRush.client.lua`, server handler in `ColorRush.server.lua`.
+- Not yet tested in Roblox Studio; run Play and inspect Output before publishing.
