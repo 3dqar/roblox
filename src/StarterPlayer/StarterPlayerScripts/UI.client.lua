@@ -199,7 +199,6 @@ local preferences={
     {"Music","MusicEnabled",true},
     {"Particles","ParticlesEnabled",true},
     {"Trails","TrailsEnabled",true},
-    {"Ghost","GhostEnabled",true},
     {"Low graphics","LowGraphicsEnabled",false},
 }
 for index,item in ipairs(preferences) do
