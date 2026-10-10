@@ -136,16 +136,43 @@ for i = 1, 70 do
     glowOrb(Vector3.new(x, 8 + (i % 3) * 4, z), Color3.fromHSV(i / 70, 0.7, 1), 3)
 end
 
+-- Five visual worlds, ten stages each. Restrained neon for mobile performance.
+local BIOMES = {
+    {name="LAVA", primary=Color3.fromRGB(245,105,70), secondary=Color3.fromRGB(110,49,62), material=Enum.Material.Basalt},
+    {name="ICE", primary=Color3.fromRGB(107,222,253), secondary=Color3.fromRGB(41,113,169), material=Enum.Material.Ice},
+    {name="CANDY", primary=Color3.fromRGB(255,126,197), secondary=Color3.fromRGB(145,91,209), material=Enum.Material.SmoothPlastic},
+    {name="SPACE", primary=Color3.fromRGB(153,124,255), secondary=Color3.fromRGB(39,44,104), material=Enum.Material.Slate},
+    {name="CYBER", primary=Color3.fromRGB(82,255,184), secondary=Color3.fromRGB(24,72,86), material=Enum.Material.Metal},
+}
+local function biomeForStage(stage)
+    return BIOMES[math.clamp(math.ceil(stage / 10),1,#BIOMES)]
+end
+for worldIndex, theme in ipairs(BIOMES) do
+    local middleZ=((worldIndex-1)*10+5)*56
+    for side=-1,1,2 do
+        for k=1,6 do
+            local z=middleZ+(k-3.5)*72
+            local x=side*(35+k%3*6)
+            local tower=part(theme.name.."_Landmark",Vector3.new(7,10+k%3*7,7),
+                CFrame.new(x,2,z),theme.secondary,theme.material)
+            tower.CanCollide=false
+            local cap=part(theme.name.."_Beacon",Vector3.new(3,3,3),
+                CFrame.new(x,10+k%3*7,z),theme.primary,Enum.Material.Neon)
+            cap.Shape=Enum.PartType.Ball;cap.CanCollide=false
+        end
+    end
+end
 -- Every stage has gaps; no connected ramps from checkpoint to checkpoint.
 for i = 1, N + 1 do
     local z = (i - 1) * 56
-    local color = Color3.fromHSV(((i - 1) % 10) / 10, 0.65, 1)
+    local theme=biomeForStage(math.min(i,N))
+    local color=theme.primary
     local pad = part("Checkpoint_" .. i, Vector3.new(13, 2, 13),
         CFrame.new(0, 12, z), i == N + 1 and Color3.fromRGB(255, 212, 53) or Color3.fromRGB(53, 224, 143), Enum.Material.Neon)
     pads[i] = pad
     part("CheckpointBorder_" .. i, Vector3.new(15, 1, 15),
         CFrame.new(0, 10.5, z), Color3.fromRGB(39, 32, 83))
-    billboard(pad, i == N + 1 and "FINISH!" or ("STAGE " .. i), 6)
+    billboard(pad, i == N + 1 and "FINISH!" or (theme.name .. " • " .. i), 6)
     if i % 5 == 1 then
         local archColor = Color3.fromHSV(((i - 1) % 10) / 10, .75, 1)
         for _,side in ipairs({-1,1}) do
@@ -200,8 +227,23 @@ for i = 1, N + 1 do
             local zstep = z + 9 * j
             local width = math.max(5.8, 9 - difficulty * .7)
             local obstacle = part(("Step_%02d_%d"):format(i, j),
-                Vector3.new(width, 1.7, 7.6), CFrame.new(x, 12, zstep), color)
-            if i % 4 == 0 and j == 2 then
+                Vector3.new(width, 1.7, 7.6), CFrame.new(x, 12, zstep), color, theme.material)
+            if i % 6 == 0 and j == 4 then
+                obstacle.Name="BOUNCE_PAD"
+                obstacle.Material=Enum.Material.Neon
+                obstacle.Color=Color3.fromRGB(255,221,69)
+                local lastBounce={}
+                obstacle.Touched:Connect(function(hit)
+                    local char=hit:FindFirstAncestorOfClass("Model")
+                    local p=char and Players:GetPlayerFromCharacter(char)
+                    local root=char and char:FindFirstChild("HumanoidRootPart")
+                    if not p or not root or os.clock()-(lastBounce[p] or 0)<1 then return end
+                    lastBounce[p]=os.clock()
+                    root.AssemblyLinearVelocity=Vector3.new(root.AssemblyLinearVelocity.X,49,root.AssemblyLinearVelocity.Z+8)
+                    local fx=Rep:FindFirstChild("BiomeFX")
+                    if fx then fx:FireClient(p,"Bounce") end
+                end)
+            elseif i % 4 == 0 and j == 2 then
                 obstacle.Name = "FallingPlatform"
                 obstacle.Touched:Connect(function(hit)
                     local model = hit:FindFirstAncestorOfClass("Model")
