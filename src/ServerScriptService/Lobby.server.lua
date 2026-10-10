@@ -7,6 +7,9 @@ local Run=game:GetService("RunService")
 local cfg=require(game:GetService("ReplicatedStorage"):WaitForChild("Config"))
 local existing=workspace:FindFirstChild("WOW_LOBBY")
 if existing then existing:Destroy() end
+local Rep=game:GetService("ReplicatedStorage")
+local portalRequest=Instance.new("RemoteEvent")
+portalRequest.Name="LobbyEnterRequest";portalRequest.Parent=Rep
 local root=Instance.new("Folder")
 root.Name="WOW_LOBBY"
 root.Parent=workspace
@@ -103,24 +106,26 @@ Players.PlayerAdded:Connect(function(p)
     p.CharacterAdded:Connect(function() task.wait(.35);sendToLobby(p) end)
     if p.Character then task.defer(sendToLobby,p) end
 end)
-portal.Touched:Connect(function(hit)
-    local model=hit:FindFirstAncestorOfClass("Model")
-    local p=model and Players:GetPlayerFromCharacter(model)
-    if not p or not p:GetAttribute("InLobby") or canEnter[p] then return end
+local function enterObby(p)
+    if not p or p:GetAttribute("InLobby")~=true or canEnter[p] then return end
     canEnter[p]=true
-    p:SetAttribute("InLobby",false)
-    task.wait(.1)
-    local stage=p:FindFirstChild("leaderstats")
-    stage=stage and stage:FindFirstChild("Stage")
+    local stats=p:FindFirstChild("leaderstats")
+    local stage=stats and stats:FindFirstChild("Stage")
     local map=workspace:WaitForChild("GeneratedObby",10)
-    local pad=map and map:WaitForChild("Checkpoint_"..tostring(stage and stage.Value or 1),10)
-    if pad and p.Character then
-        p.Character:PivotTo(pad.CFrame*CFrame.new(0,6,0))
-    else
-        p:SetAttribute("InLobby",true)
-        sendToLobby(p)
-    end
-    task.delay(2,function() canEnter[p]=nil end)
+    local pad=map and map:FindFirstChild("Checkpoint_"..tostring(stage and stage.Value or 1))
+    if not pad or not p.Character then canEnter[p]=nil return end
+    p:SetAttribute("InLobby",false)
+    p.Character:PivotTo(pad.CFrame*CFrame.new(0,6,0))
+    task.delay(1.2,function()canEnter[p]=nil end)
+end
+portal.Touched:Connect(function(hit)
+    local char=hit:FindFirstAncestorOfClass("Model")
+    local p=char and Players:GetPlayerFromCharacter(char)
+    enterObby(p)
+end)
+portalRequest.OnServerEvent:Connect(function(p)
+    -- The client may enter only from the lobby state.
+    enterObby(p)
 end)
 local ranks,donations
 if not Run:IsStudio() or cfg.StudioDataStores then
