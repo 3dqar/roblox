@@ -10,6 +10,9 @@ return {
     AbilityPrices = {DoubleJump = 19, Glide = 29},
     EffectPasses = {Aura = 0, Crown = 0, Bomz = 0}, -- Game Pass IDs: 10, 20, 40 Robux
     EffectPrices = {Aura = 10, Crown = 20, Bomz = 40},
+    TrailCoinPrices = {Fire = 500, Ice = 1100, Rainbow = 2500},
+    TrailPasses = {Galaxy = 0, Lightning = 0, Royal = 0}, -- Game Pass IDs, set in Creator Dashboard
+    TrailRobuxPrices = {Galaxy = 15, Lightning = 25, Royal = 40},
     VipPrice = 39,
     DonationPrices = {5, 15, 30},
     Missions = {
