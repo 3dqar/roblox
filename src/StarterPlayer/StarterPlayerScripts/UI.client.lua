@@ -124,14 +124,15 @@ local help = modal("HowToPlay", "👋 WELCOME, PLAYER!", 370)
 local settings = modal("Settings", "⚙️ SETTINGS", 455)
 local donate = modal("Support", "💜 SUPPORT THE GAME", 360)
 local names = {
-    {"SHOP", shop}, {"QUESTS", missions}, {"SUPPORT", donate}, {"HELP", help}, {"⚙", settings}
+    {"SHOP", shop}, {"QUESTS", missions}, {"HELP", help}, {"⚙", settings}
 }
 for i, tuple in ipairs(names) do
     local a, target = tuple[1], tuple[2]
     local b = button(nav, "Nav" .. i, a, UDim2.new((i - 1) / #names, 3, 0, 7),
         UDim2.new(1 / #names, -6, 0, 30), i == 1 and COLOR.purple or COLOR.panel,
         function() local visible = target.Visible; hideAll(); target.Visible = not visible end)
-    b.TextScaled = true
+    b.TextScaled = false
+    b.TextSize=12
 end
 
 local toast = newFrame(gui, "Toast", UDim2.new(0.5, 0, 1, -90), UDim2.new(0.85, 0, 0, 45), COLOR.dark)
