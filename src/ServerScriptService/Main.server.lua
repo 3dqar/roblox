@@ -191,6 +191,19 @@ for i = 1, N + 1 do
         if current and i == current.Value + 1 then
             setStage(player, i)
         end
+        if player:GetAttribute("PrestigeRun") then
+            local nextStage=player:GetAttribute("PrestigeStage")
+            if type(nextStage)=="number" and i==nextStage+1 then
+                if i==N+1 then
+                    player:SetAttribute("PrestigeRun",false)
+                    player:SetAttribute("PrestigeStage",nil)
+                    local prestigeRemote=Rep:FindFirstChild("PrestigeEvent")
+                    if prestigeRemote then prestigeRemote:FireClient(player,"Completed",player:GetAttribute("Prestige") or 0) end
+                else
+                    player:SetAttribute("PrestigeStage",i)
+                end
+            end
+        end
         local expected = player:GetAttribute("SpeedrunNextStage")
         if type(expected)=="number" and expected == i then
             if i == N + 1 then
