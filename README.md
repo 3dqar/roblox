@@ -113,3 +113,13 @@ Place a few decorative models in Studio Workspace under a custom "ManualDecor" f
 
 ### Personal ghost quality / scalability
 Ghost is created **only in Arcade.client.lua on the local client**; the server sends each player their own saved best samples only. One ghost is shown at a time and the prior one is destroyed. It is not replicated to other players. The stored record now has a bounded 600-sample budget with fixed 0.5-second intervals (roughly 5 minutes of track). Old hourly treasure collection stamps are pruned.
+
+## Five-world / Prestige update
+- 50 checkpoints in five ten-stage themes: Lava, Ice, Candy, Space, Cyber. Stage surfaces and perimeter sculptures use biome-specific materials and colors.
+- Yellow BOUNCE PAD platforms in every sixth stage impart an upward boost and play local particle FX. The server applies physics; the player sees client-only particles.
+- Animated lobby entrance: three cinematic camera views and a prominent PLAY button; pressing PLAY calls the server-side lobby portal action.
+- New Prestige option once the original stage 51 finish is unlocked. Prestige preserves stored stage progress and starts a new sequential challenge loop from stage 1; Prestige count is persisted separately.
+- Compatible with existing Treasure Hunt, Arcade minigames, and saved records, but Roblox Studio playtesting is still required.
+
+## Quality assurance still required
+This repository was updated and checked via GitHub file reads, not executed in Roblox Studio. Verify all five biome transitions, bounce trajectories, PLAY portal, Prestige start/completion/respawn, mobile button overlap and device performance. Prestige is a replay challenge and does **not** currently reset the main saved Stage; that is intentional to avoid data loss. This version does not yet grant special currency for completing a Prestige loop.
