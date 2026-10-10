@@ -176,6 +176,13 @@ Players.PlayerAdded:Connect(function(p)
         end
     end
     if not d.trails[d.equippedTrail] then d.equippedTrail="Aurora" end
+    local doubleId=cfg.AbilityPasses and cfg.AbilityPasses.DoubleJump or 0
+    if doubleId~=0 then
+        local passOk,has=pcall(function()return Market:UserOwnsGamePassAsync(p.UserId,doubleId) end)
+        p:SetAttribute("HasDoubleJump",passOk and has or false)
+    else
+        p:SetAttribute("HasDoubleJump",false)
+    end
     d.loaded=ok
     p:SetAttribute("EquippedTrail",d.equippedTrail)
     local coins=Instance.new("IntValue")
@@ -243,18 +250,19 @@ bonus.Event:Connect(function(p, action, key)
         d.coins+=20
         if coins then coins.Value=d.coins end
     elseif action=="DoubleJump" then
-        if d.coins<80 then
-            remote:FireClient(p,"PurchaseDenied","Need 80 Coins!")
+        -- Permanent ability: never deduct earned Coins for this Game Pass.
+        local id=cfg.AbilityPasses and cfg.AbilityPasses.DoubleJump or 0
+        if id==0 then
+            remote:FireClient(p,"PurchaseDenied","Double Jump Game Pass not configured.")
             return
         end
-        if (p:GetAttribute("DoubleJumpUntil") or 0)>os.time() then
-            remote:FireClient(p,"PurchaseDenied","Boost already active!")
+        local ok,has=pcall(function()return Market:UserOwnsGamePassAsync(p.UserId,id) end)
+        if not ok or not has then
+            remote:FireClient(p,"PurchaseDenied","Double Jump requires its Game Pass.")
             return
         end
-        d.coins-=80
-        if coins then coins.Value=d.coins end
-        p:SetAttribute("DoubleJumpUntil",os.time()+180)
-        remote:FireClient(p,"BoostUnlocked",180)
+        p:SetAttribute("HasDoubleJump",true)
+        remote:FireClient(p,"BoostUnlocked",0)
     else return end
     sync(p)
     task.spawn(save,p)
@@ -320,6 +328,10 @@ remote.OnServerEvent:Connect(function(p,action,arg)
 end)
 Market.PromptGamePassPurchaseFinished:Connect(function(p,passId,purchased)
     if not purchased or not state[p] then return end
+    if cfg.AbilityPasses and cfg.AbilityPasses.DoubleJump~=0 and passId==cfg.AbilityPasses.DoubleJump then
+        local ok,has=pcall(function()return Market:UserOwnsGamePassAsync(p.UserId,passId) end)
+        if ok and has then p:SetAttribute("HasDoubleJump",true) end
+    end
     for name,id in pairs(cfg.TrailPasses or {}) do
         if id~=0 and passId==id then
             local ok,has=pcall(function()return Market:UserOwnsGamePassAsync(p.UserId,id) end)
