@@ -142,6 +142,10 @@ local function leaderboard(p, best)
     pcall(function() rankings:SetAsync(tostring(p.UserId), math.floor(best * 100)) end)
 end
 Players.PlayerAdded:Connect(function(p)
+    if not store and not Run:IsStudio() then
+        p:Kick("Reward DataStore unavailable. Please rejoin later.")
+        return
+    end
     local d={coins=0, lastDaily=-1, effects={Rain=true}, premium={}, equipped="Rain", bestTime=0, finished=0, wheelDay=-1, secrets={}, start=os.clock(), trails={Aurora=true}, equippedTrail="Aurora", loaded=false}
     state[p]=d
     local ok, value = not store, nil
