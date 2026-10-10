@@ -8,6 +8,7 @@ local function setup(char)
     local root=char:WaitForChild("HumanoidRootPart",10)
     if not humanoid or not root then return end
     humanoid.Died:Once(function()
+        if player:GetAttribute("ParticlesEnabled")==false then return end
         local anchor=Instance.new("Part")
         anchor.Name="DeathBurst"
         anchor.Anchored=true;anchor.CanCollide=false;anchor.CanTouch=false;anchor.CanQuery=false
