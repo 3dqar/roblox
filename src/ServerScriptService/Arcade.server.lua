@@ -44,7 +44,7 @@ local function save(p)
         local stampHour=tonumber(string.match(tostring(stamp),"^(%d+):"))
         if not stampHour or stampHour<cutoff then d.treasures[stamp]=nil end
     end
-    local record={chestDay=d.chestDay,challengeDay=d.challengeDay,treasures=d.treasures,ghost=d.ghost,ghostTime=d.ghostTime}
+    local record={treasures=d.treasures}
     local ok,err=pcall(function()store:SetAsync(tostring(p.UserId),record) end)
     if not ok then warn("Arcade save error:",err) end
 end
