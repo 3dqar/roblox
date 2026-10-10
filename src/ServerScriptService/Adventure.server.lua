@@ -58,25 +58,4 @@ for index,stage in ipairs({4,14,24}) do
     local bridge=build(secrets,"SecretBridge_"..index,Vector3.new(12,1.3,5),
         CFrame.new(x/2,11.6,z+22),Color3.fromRGB(116,93,235))
 end
--- Lobby start gate: optional speedrun from stage one, existing portal remains normal play.
-local gate=build(lobby,"SpeedrunGate",Vector3.new(14,13,2),
-    CFrame.new(Vector3.new(-29,82,-180)+Vector3.new(0,0,26)),
-    Color3.fromRGB(248,193,59),Enum.Material.Neon)
-gate.Transparency=.55;gate.CanCollide=false
-textSign(gate,"⚡ SPEEDRUN")
-local promptSpeed=Instance.new("ProximityPrompt")
-promptSpeed.ActionText="Start timer";promptSpeed.ObjectText="SPEEDRUN CHALLENGE"
-promptSpeed.MaxActivationDistance=12;promptSpeed.Parent=gate
-promptSpeed.Triggered:Connect(function(p)
-    local stage=p:FindFirstChild("leaderstats")
-    stage=stage and stage:FindFirstChild("Stage")
-    if not stage then return end
-    -- Speedrun requires a fresh character checkpoint, but does not overwrite saved stage.
-    p:SetAttribute("SpeedrunStart",os.clock())
-    p:SetAttribute("SpeedrunNextStage",2)
-    p:SetAttribute("InLobby",false)
-    local first=map:FindFirstChild("Checkpoint_1")
-    if first and p.Character then p.Character:PivotTo(first.CFrame+CFrame.new(0,6,0)) end
-    remote:FireClient(p,"SpeedrunStart",0)
-end)
-print("TROLL OBBY Adventure: 3 secrets, photo zone and speedrun gate created")
+print("TROLL OBBY Adventure: secret rooms enabled")
