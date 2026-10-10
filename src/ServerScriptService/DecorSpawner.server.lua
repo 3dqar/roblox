@@ -20,8 +20,13 @@ local placed=0
 local function findTemplate(candidates)
     for _,candidate in ipairs(candidates) do
         for _,item in ipairs(templates:GetDescendants()) do
-            if item.Name:lower()==candidate:lower() and (item:IsA("Model") or item:IsA("BasePart")) then
-                return item
+            if (item.Name:lower()==candidate:lower() or (candidate=="MapleStory Portal" and item.Name:lower():find("maplestory",1,true))) then
+                if item:IsA("Model") or item:IsA("BasePart") then return item end
+                if item:IsA("Folder") then
+                    for _,nested in ipairs(item:GetDescendants()) do
+                        if nested:IsA("Model") or nested:IsA("BasePart") then return nested end
+                    end
+                end
             end
         end
     end
@@ -81,7 +86,7 @@ local function source(...)
     return findTemplate({...})
 end
 local tree=source("PineTree","Low Poly Tree Pack")
-local bush=source("Blue Bush","envirom ent","environment")
+local bush=source("Blue Bush","environment")
 local rocks=source("BauLowPoly","Low poly","QBit Low Poly Asset")
 local island=source("Island")
 local bench=source("lamp bench")
