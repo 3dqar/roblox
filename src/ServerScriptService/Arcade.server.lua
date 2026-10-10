@@ -191,6 +191,8 @@ task.spawn(function()
 end)
 -- Best-run position sampling; on the next run client plays back a translucent ghost.
 local track={}
+local MAX_GHOST_SAMPLES=600
+local SAMPLE_INTERVAL=.5
 Players.PlayerAdded:Connect(function(p)
     local d={chestDay=-1,challengeDay=-1,treasures={},ghost={},ghostTime=0,loaded=false}
     state[p]=d
@@ -201,6 +203,7 @@ Players.PlayerAdded:Connect(function(p)
             d.challengeDay=tonumber(v.challengeDay) or -1
             d.treasures=type(v.treasures)=="table" and v.treasures or {}
             d.ghost=type(v.ghost)=="table" and v.ghost or {}
+            while #d.ghost>MAX_GHOST_SAMPLES do table.remove(d.ghost) end
             d.ghostTime=tonumber(v.ghostTime) or 0
         end
         d.loaded=ok
@@ -208,10 +211,10 @@ Players.PlayerAdded:Connect(function(p)
     p:GetAttributeChangedSignal("SpeedrunStart"):Connect(function()
         if type(p:GetAttribute("SpeedrunStart"))=="number" then
             track[p]={samples={},started=os.clock()}
-            if #d.ghost>1 then notify(p,"Ghost",d.ghost) end
+            if #d.ghost>1 then notify(p,"Ghost",{samples=d.ghost, interval=SAMPLE_INTERVAL, bestTime=d.ghostTime}) end
         elseif track[p] then
             local previous=track[p];track[p]=nil
-            local finished=p:GetAttribute("SpeedrunNextStage")==nil
+            local finished=p:GetAttribute("SpeedrunNextStage")==nil and p:GetAttribute("InLobby")==false
             local elapsed=os.clock()-previous.started
             if finished and #previous.samples>=6 and (d.ghostTime==0 or elapsed<d.ghostTime) then
                 d.ghost=previous.samples;d.ghostTime=elapsed
@@ -221,11 +224,11 @@ Players.PlayerAdded:Connect(function(p)
     end)
 end)
 task.spawn(function()
-    while task.wait(.5) do
+    while task.wait(SAMPLE_INTERVAL) do
         for p,r in pairs(track) do
             local c=p.Character
             local root=c and c:FindFirstChild("HumanoidRootPart")
-            if root and #r.samples<500 then
+            if root and #r.samples<MAX_GHOST_SAMPLES then
                 local v=root.Position
                 table.insert(r.samples,{math.floor(v.X*10)/10,math.floor(v.Y*10)/10,math.floor(v.Z*10)/10})
             end
