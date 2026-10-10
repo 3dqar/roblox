@@ -206,34 +206,7 @@ for i = 1, N + 1 do
                 end
             end
         end
-        local expected = player:GetAttribute("SpeedrunNextStage")
-        if type(expected)=="number" and expected == i then
-            if i == N + 1 then
-                local start = player:GetAttribute("SpeedrunStart")
-                local elapsed = type(start)=="number" and math.floor((os.clock()-start)*100)/100 or nil
-                player:SetAttribute("SpeedrunNextStage",nil)
-                player:SetAttribute("SpeedrunStart",nil)
-                if elapsed and elapsed > 0 then
-                    local adventure = Rep:FindFirstChild("AdventureEvent")
-                    if adventure then adventure:FireClient(player,"SpeedrunFinish",elapsed) end
-                    if not Run:IsStudio() or Config.StudioDataStores then
-                        task.spawn(function()
-                            local success,err=pcall(function()
-                                local board=DSS:GetOrderedDataStore("TrollObbyV4_BestTime")
-                                board:UpdateAsync(tostring(player.UserId),function(previous)
-                                    local score=math.floor(elapsed*100)
-                                    if type(previous)=="number" then return math.min(previous,score) end
-                                    return score
-                                end)
-                            end)
-                            if not success then warn("Speedrun record save failed:",err) end
-                        end)
-                    end
-                end
-            else
-                player:SetAttribute("SpeedrunNextStage",i+1)
-            end
-        end
+
     end)
     if i <= N then
         local difficulty = 1 + math.floor((i - 1) / 8)
@@ -367,8 +340,7 @@ Players.PlayerAdded:Connect(function(player)
         task.wait(0.1)
         if player:GetAttribute("InLobby") == false then
             local replay=player:GetAttribute("PrestigeRun") and player:GetAttribute("PrestigeStage")
-            local race=player:GetAttribute("SpeedrunNextStage")
-            tp(player, tonumber(replay) or (type(race)=="number" and math.max(1,race-1)) or stage.Value)
+            tp(player, tonumber(replay) or stage.Value)
         end
         vip(player)
     end)
