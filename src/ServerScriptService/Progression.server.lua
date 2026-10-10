@@ -259,13 +259,7 @@ end
 remote.OnServerEvent:Connect(function(p,action,arg)
     local d=state[p]
     if not d then return end
-    if action=="Daily" then
-        if d.lastDaily>=utcDay() then return end
-        d.lastDaily=utcDay()
-        d.coins+=75
-        p.leaderstats.Coins.Value=d.coins
-        remote:FireClient(p,"DailyClaimed",75)
-    elseif action=="Effect" and type(arg)=="string" and owned[arg] then
+    if action=="Effect" and type(arg)=="string" and owned[arg] then
         if cost[arg] and not d.effects[arg] then
             if d.coins<cost[arg] then return end
             d.coins-=cost[arg]
